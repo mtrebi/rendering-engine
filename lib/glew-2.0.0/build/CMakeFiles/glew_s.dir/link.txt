@@ -1,0 +1,2 @@
+/usr/bin/ar qc lib/libGLEW.a  CMakeFiles/glew_s.dir/home/maru/Documents/RC/code/OpenGL/rendering-engine/lib/glew-2.0.0/src/glew.c.o
+/usr/bin/ranlib lib/libGLEW.a

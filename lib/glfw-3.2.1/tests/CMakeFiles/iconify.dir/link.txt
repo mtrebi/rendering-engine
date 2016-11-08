@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/iconify.dir/iconify.c.o CMakeFiles/iconify.dir/__/deps/getopt.c.o CMakeFiles/iconify.dir/__/deps/glad.c.o  -o iconify -rdynamic ../src/libglfw.so.3.2 -lm -Wl,-rpath,/home/maru/Documents/RC/code/OpenGL/engine/lib/glfw-3.2.1/src 
