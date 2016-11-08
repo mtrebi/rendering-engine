@@ -1,5 +1,5 @@
 # CMake entry point
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.5)
 project (engine)
 
 find_package(OpenGL REQUIRED)
@@ -29,6 +29,9 @@ add_definitions(
 	-DGLEW_STATIC
 	-D_CRT_SECURE_NO_WARNINGS
 )
+add_compile_options(-std=c++11) 
+
+
 #add_library(main ${_HDRS} ${_SRCS})
 
 # main.cpp
