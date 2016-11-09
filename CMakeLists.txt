@@ -11,6 +11,7 @@ add_subdirectory (lib)
 include_directories(
 	lib/glfw-3.2.1/include/GLFW/
 	lib/glew-1.13.0/include/
+	include/
 )
 
 set(ALL_LIBS
@@ -32,12 +33,9 @@ add_definitions(
 add_compile_options(-std=c++11) 
 
 
-#add_library(main ${_HDRS} ${_SRCS})
-
 # main.cpp
 add_executable(main src/main.cpp)
 target_link_libraries(main ${ALL_LIBS})
-
 
 
 #[[
