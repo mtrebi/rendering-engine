@@ -99,10 +99,12 @@ int main()
 
     // Set up vertex data (and buffer(s)) and attribute pointers
     GLfloat vertices[] = {
-        0.5f,  0.5f, 0.0f,  // Top Right
-        0.5f, -0.5f, 0.0f,  // Bottom Right
-        -0.5f, -0.5f, 0.0f,  // Bottom Left
-        -0.5f,  0.5f, 0.0f   // Top Left
+        -0.25f,  0.5f, 0.0f,  // Triangle 1: Top
+        -0.5f, -0.5f, 0.0f,  // Triangle 1: Left
+        0.0f, -0.5f, 0.0f,  // Triangle 1: Right
+        0.25f,  0.5f, 0.0f,  // Triangle 2: Top
+        0.0f, -0.5f, 0.0f,  // Triangle 2: Left
+        0.5f, -0.5f, 0.0f  // Triangle 2: Right
     };
 
     GLuint indices[] = {  // Note that we start from 0!
@@ -145,7 +147,8 @@ int main()
         // Draw our first triangle
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // Swap the screen buffers
