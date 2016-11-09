@@ -28,6 +28,13 @@ const GLchar* fragmentShaderSource = "#version 330 core\n"
     "color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
     "}\n\0";
 
+const GLchar* fragmentShaderSource_yellow = "#version 330 core\n"
+    "out vec4 color;\n"
+    "void main()\n"
+    "{\n"
+    "color = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
+    "}\n\0";
+
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
@@ -82,19 +89,45 @@ int main()
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
+
+    GLuint fragmentShader_yellow = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader_yellow, 1, &fragmentShaderSource_yellow, NULL);
+    glCompileShader(fragmentShader_yellow);
+    // Check for compile time errors
+    glGetShaderiv(fragmentShader_yellow, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader_yellow, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
     // Link shaders
     GLuint shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+
+    // Link shaders
+    GLuint shaderProgram_yellow = glCreateProgram();
+    glAttachShader(shaderProgram_yellow, vertexShader);
+    glAttachShader(shaderProgram_yellow, fragmentShader_yellow);
+    glLinkProgram(shaderProgram_yellow);
+
     // Check for linking errors
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
+
+    glGetProgramiv(shaderProgram_yellow, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram_yellow, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+    glDeleteShader(fragmentShader_yellow);
 
 
     // Set up vertex data (and buffer(s)) and attribute pointers
@@ -174,9 +207,10 @@ int main()
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
+        glUseProgram(shaderProgram_yellow);
         glBindVertexArray(VAOs[1]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        
+
         glBindVertexArray(0);
 
         // Swap the screen buffers
