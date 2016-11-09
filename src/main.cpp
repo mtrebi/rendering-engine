@@ -99,18 +99,29 @@ int main()
 
     // Set up vertex data (and buffer(s)) and attribute pointers
     GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f, // Left  
-         0.5f, -0.5f, 0.0f, // Right 
-         0.0f,  0.5f, 0.0f  // Top   
+        0.5f,  0.5f, 0.0f,  // Top Right
+        0.5f, -0.5f, 0.0f,  // Bottom Right
+        -0.5f, -0.5f, 0.0f,  // Bottom Left
+        -0.5f,  0.5f, 0.0f   // Top Left
     };
-    GLuint VBO, VAO;
+
+    GLuint indices[] = {  // Note that we start from 0!
+        0, 1, 3,   // First Triangle
+        1, 2, 3    // Second Triangle
+    };  
+
+
+    GLuint VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
+    glGenBuffers(1, &EBO);
+    // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s) and finally the indices array
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
@@ -119,6 +130,7 @@ int main()
 
     glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Enable wire-frame mode
     // Game loop
     while (!glfwWindowShouldClose(window))
     {
@@ -133,7 +145,7 @@ int main()
         // Draw our first triangle
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // Swap the screen buffers
