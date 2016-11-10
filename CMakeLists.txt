@@ -7,21 +7,19 @@ find_package(OpenGL REQUIRED)
 # Compile lib dependencies 
 add_subdirectory (lib)
 
-
-include_directories(
-	lib/glfw-3.2.1/include/GLFW/
-	lib/glew-1.13.0/include/
+## Add headers files
+include_directories (
 	include/
 )
 
-set(ALL_LIBS
-	${OPENGL_LIBRARY}
-	glfw
-	GLEW_1130
-)
 
-#file(GLOB_RECURSE _HDRS "include/*.h")
-#file(GLOB_RECURSE _SRCS "src/*.cpp")
+set(ALL_LIBS
+	SOIL
+	glfw
+	GLEW
+		${OPENGL_LIBRARY}
+
+)
 
 add_definitions(
 	-DTW_STATIC
@@ -30,7 +28,10 @@ add_definitions(
 	-DGLEW_STATIC
 	-D_CRT_SECURE_NO_WARNINGS
 )
-add_compile_options(-std=c++11) 
+
+add_compile_options(
+	-std=c++11
+) 
 
 
 # main.cpp
