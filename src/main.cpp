@@ -93,9 +93,13 @@ int main()
 
     glBindVertexArray(0); // Unbind VAO
 
+    // Generate texture from image
+    int width, height;
+    unsigned char* image = SOIL_load_image("../assets/textures/container.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+
     GLuint textures[2];
     // Generate texture obj.
-    glGenTextures(2, textures);
+    glGenTextures(1, textures);
     // Bind texture
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     // Set our texture parameters
@@ -105,24 +109,16 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // Generate texture from image
-    int width, height;
-    unsigned char* image = SOIL_load_image("../assets/textures/container.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-    // Generate texture from image
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
     // Automatically generates all the mipmaps for the texture
     glGenerateMipmap(GL_TEXTURE_2D); 
     // Free memory
     SOIL_free_image_data(image);
 
-    glBindTexture(GL_TEXTURE_2D, textures[1]);
-    // Set our texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   // Set texture wrapping to GL_REPEAT
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // Set texture filtering
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // Generate texture from image
     image = SOIL_load_image("../assets/textures/awesomeface.png", &width, &height, 0, SOIL_LOAD_RGB);
+
+    glBindTexture(GL_TEXTURE_2D, 1);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
     // Generate texture from image
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
     // Automatically generates all the mipmaps for the texture
@@ -130,8 +126,6 @@ int main()
     // Free memory
     SOIL_free_image_data(image);
     
-    glBindTexture(GL_TEXTURE_2D, 0);
-
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -147,18 +141,20 @@ int main()
         // Draw the triangle
         ourShader.Use();
 
-        // Bind Textures using texture units
+        //glUniform1f(glGetUniformLocation(ourShader.Program, "ourTexture"), 0.25f);
+        
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textures[0]);
         glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);
+        
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textures[1]);
-        glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture2"), 1);  
-        
-        // Draw container
+        glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture2"), 1);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        glBindVertexArray(0); 
+
 
         // Swap the screen buffers
         glfwSwapBuffers(window);
