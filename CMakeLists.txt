@@ -21,6 +21,9 @@ set(ALL_LIBS
 
 )
 
+set(SOURCES src/main.cpp src/Camera.cpp)
+
+
 add_definitions(
 	-DTW_STATIC
 	-DTW_NO_LIB_PRAGMA
@@ -35,7 +38,7 @@ add_compile_options(
 
 
 # main.cpp
-add_executable(main src/main.cpp)
+add_executable(main ${SOURCES})
 target_link_libraries(main ${ALL_LIBS})
 
 
