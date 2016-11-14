@@ -29,6 +29,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void do_movement();
 void calculate_times();
 void calculate_lightPos();
+void calculate_lightColor();
 
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f)); 
@@ -41,6 +42,7 @@ bool firstMouse = false;
 
 // Light
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
 
 // The MAIN function, from here we start the application and run the game loop
@@ -168,6 +170,7 @@ int main()
         // Set frame time
         calculate_times();
         calculate_lightPos();
+        calculate_lightColor();
         // Check and call events
         glfwPollEvents();
         do_movement();
@@ -178,16 +181,36 @@ int main()
 
         basicShader.Use();
         // Get the uniform locations
-        GLint lightColorLoc = glGetUniformLocation(basicShader.Program, "lightColor");
         GLint objectColorLoc = glGetUniformLocation(basicShader.Program, "objectColor");
-        GLint lightPosLoc = glGetUniformLocation(basicShader.Program, "lightPos");
         GLint viewPosLoc = glGetUniformLocation(basicShader.Program, "viewPos");
+       
+        glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
+        glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
 
         // Pass the matrices to the shader
-        glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
-        glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
+            // Material
+        GLint matAmbientLoc = glGetUniformLocation(basicShader.Program, "material.Ka");
+        GLint matDiffuseLoc = glGetUniformLocation(basicShader.Program, "material.Kd");
+        GLint matSpecularLoc = glGetUniformLocation(basicShader.Program, "material.Ks");
+        GLint matShininessLoc = glGetUniformLocation(basicShader.Program, "material.shininess");
+
+        glUniform3f(matAmbientLoc,  1.0f, 0.5f, 0.31f);
+        glUniform3f(matDiffuseLoc,  1.0f, 0.5f, 0.31f);
+        glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
+        glUniform1f(matShininessLoc,    32.0f);
+
+            // Light
+        GLint lightPosLoc = glGetUniformLocation(basicShader.Program, "light.position");
+        GLint lightAmbientLoc = glGetUniformLocation(basicShader.Program, "light.Ka");
+        GLint lightDiffuseLoc = glGetUniformLocation(basicShader.Program, "light.Kd");
+        GLint lightSpecularLoc = glGetUniformLocation(basicShader.Program, "light.Ks");
+        GLint lightColorLoc = glGetUniformLocation(basicShader.Program, "light.color");
+
         glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-        glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
+        glUniform3f(lightAmbientLoc,  0.2f, 0.2f, 0.2f);
+        glUniform3f(lightDiffuseLoc,  0.5f, 0.5f, 0.5f);
+        glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);  
+        glUniform3f(lightColorLoc, lightColor.x, lightColor.y, lightColor.z);  
 
         // Create camera transformations
         glm::mat4 view = camera.GetViewMatrix();
@@ -288,6 +311,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 void calculate_lightPos(){
     lightPos.x = sin(glfwGetTime());
     lightPos.y = cos(glfwGetTime());
+}
+
+void calculate_lightColor(){
+    lightColor.x = sin(glfwGetTime() * 2.0f);
+    lightColor.y = sin(glfwGetTime() * 0.7f);
+    lightColor.z = sin(glfwGetTime() * 0.3f);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
