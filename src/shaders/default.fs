@@ -7,7 +7,8 @@ struct Material {
 
 struct Light {
 	vec3 color;
-	vec3 position;
+	//vec3 position;
+	vec3 direction;
     vec3 Ka;
     vec3 Kd;
     vec3 Ks;
@@ -33,7 +34,8 @@ void main()
 
 	// Diffuse
 	vec3 normal = normalize(Normal);
-	vec3 lightVector = normalize(light.position - Position);
+	//vec3 lightVector = normalize(light.position - Position);
+	vec3 lightVector = normalize(-light.direction);
 	//vec3 diffuseComponent = vec3(texture(material.diffuse, TexCoords)) * light.Kd * light.color * (max(dot(lightVector, normal), 0.0f)) ;
 	vec3 diffuseComponent = vec3(texture(material.diffuse, TexCoords)) * light.Kd * light.color * (max(dot(lightVector, normal), 0.0f)) ;
 

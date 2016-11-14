@@ -42,6 +42,7 @@ bool firstMouse = false;
 // Light
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+glm::vec3 lightDir(1.0f, 1.0f, 1.0f);
 
 
 // The MAIN function, from here we start the application and run the game loop
@@ -203,13 +204,6 @@ int main()
     glUniform1i(glGetUniformLocation(basicShader.Program, "material.diffuse"), 0);
     glUniform1i(glGetUniformLocation(basicShader.Program, "material.specular"), 1);
 
-    // Bind diffuse map
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, specularMap);
-
     // Game loop
     while(!glfwWindowShouldClose(window))
     {
@@ -234,20 +228,19 @@ int main()
 
         // Pass the matrices to the shader
             // Material
-        GLint matSpecularLoc = glGetUniformLocation(basicShader.Program, "material.Ks");
         GLint matShininessLoc = glGetUniformLocation(basicShader.Program, "material.shininess");
-
-        glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
         glUniform1f(matShininessLoc,    32.0f);
 
             // Light
-        GLint lightPosLoc = glGetUniformLocation(basicShader.Program, "light.position");
+        GLint lightDirLoc = glGetUniformLocation(basicShader.Program, "light.direction");
+        //GLint lightPosLoc = glGetUniformLocation(basicShader.Program, "light.position");
         GLint lightAmbientLoc = glGetUniformLocation(basicShader.Program, "light.Ka");
         GLint lightDiffuseLoc = glGetUniformLocation(basicShader.Program, "light.Kd");
         GLint lightSpecularLoc = glGetUniformLocation(basicShader.Program, "light.Ks");
         GLint lightColorLoc = glGetUniformLocation(basicShader.Program, "light.color");
 
-        glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+        //glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+        glUniform3f(lightDirLoc, lightDir.x, lightDir.y, lightDir.z);
         glUniform3f(lightAmbientLoc,  0.2f, 0.2f, 0.2f);
         glUniform3f(lightDiffuseLoc,  0.5f, 0.5f, 0.5f);
         glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);  
@@ -263,6 +256,14 @@ int main()
         // Pass the matrices to the shader
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+        // Bind diffuse map
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
 
         // Draw the container (using container's vertex attributes)
         glBindVertexArray(VAO);
