@@ -246,18 +246,25 @@ int main()
         glUniform1f(matShininessLoc,    32.0f);
 
             // Light
-        GLint lightDirLoc = glGetUniformLocation(basicShader.Program, "light.direction");
-        //GLint lightPosLoc = glGetUniformLocation(basicShader.Program, "light.position");
+
+        //GLint lightDirLoc = glGetUniformLocation(basicShader.Program, "light.direction");
+        GLint lightPosLoc = glGetUniformLocation(basicShader.Program, "light.position");
         GLint lightAmbientLoc = glGetUniformLocation(basicShader.Program, "light.Ka");
         GLint lightDiffuseLoc = glGetUniformLocation(basicShader.Program, "light.Kd");
         GLint lightSpecularLoc = glGetUniformLocation(basicShader.Program, "light.Ks");
+        GLint lightConstantLoc = glGetUniformLocation(basicShader.Program, "light.Kc");
+        GLint lightLinearLoc = glGetUniformLocation(basicShader.Program, "light.Kl");
+        GLint lightQuadraticLoc = glGetUniformLocation(basicShader.Program, "light.Kq");
         GLint lightColorLoc = glGetUniformLocation(basicShader.Program, "light.color");
 
-        //glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-        glUniform3f(lightDirLoc, lightDir.x, lightDir.y, lightDir.z);
+        glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+        //glUniform3f(lightDirLoc, lightDir.x, lightDir.y, lightDir.z);
         glUniform3f(lightAmbientLoc,  0.2f, 0.2f, 0.2f);
         glUniform3f(lightDiffuseLoc,  0.5f, 0.5f, 0.5f);
         glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);  
+        glUniform1f(lightConstantLoc, 1.0f);
+        glUniform1f(lightLinearLoc, 0.09f);
+        glUniform1f(lightQuadraticLoc, 0.032f);
         glUniform3f(lightColorLoc, lightColor.x, lightColor.y, lightColor.z);  
 
         // Create camera transformations
