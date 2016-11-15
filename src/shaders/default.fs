@@ -5,61 +5,67 @@ struct Material {
     float shininess;
 }; 
 
-struct Light {
-	vec3 position;
-	vec3 color;
-	float cutOff;
-	float outerCutOff;
+struct DirectionalLight {
 	vec3 direction;
-    vec3 Ka;
-    vec3 Kd;
-    vec3 Ks;
+	// Phong
+	vec3 Ka;
+	vec3 Kd;
+	vec3 Ks;
+};
 
+struct PointLight {
+	vec3 position;
+	// Phong
+	vec3 Ka;
+	vec3 Kd;
+	vec3 Ks;
     // Attenuation
     float Kc;
     float Kl;
     float Kq;
-}; 
+};
+
+struct SpotLight{
+	vec3 direction;
+	vec3 position;
+	// Radius
+	float innerCutOff;
+	float outerCutOff;
+	// Phong
+	vec3 Ka;
+	vec3 Kd;
+	vec3 Ks;	
+    // Attenuation
+    float Kc;
+    float Kl;
+    float Kq;
+};
+
 
 uniform vec3 objectColor;
 uniform vec3 viewPos;
 uniform Material material;
-uniform Light light;
+
+// Lights
+uniform DirectionalLight directionalLight;
+#define NR_POINT_LIGHTS 4  
+uniform PointLight pointLights[NR_POINT_LIGHTS];
+uniform SpotLight spotLight;
 
 in vec3 Normal;
-in vec3 Position;
+in vec3 FragPosition;
 in vec2 TexCoords;
 
 out vec4 color;
 
+// Function prototypes
+vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 view);
+vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 view);
+vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 view);
 
+float CalculatePointLightAttenuation(float Kc, float Kl, float Kq, float distance);
 
-
-float light_attenuation(float d){
-	return 1 / ((light.Kc + light.Kl * d) + (light.Kq * pow(d,2)));
-}
-
-void phong_lighting(){
-	// Ambient
-	//vec3 ambientComponent = vec3(texture(material.diffuse, TexCoords)) * light.Ka;
-	vec3 ambientComponent = vec3(texture(material.diffuse, TexCoords)) * light.Ka;
-
-	// Diffuse
-	vec3 normal = normalize(Normal);
-	vec3 lightVector = normalize(light.position - Position);
-	//vec3 diffuseComponent = vec3(texture(material.diffuse, TexCoords)) * light.Kd * light.color * (max(dot(lightVector, normal), 0.0f)) ;
-	vec3 diffuseComponent = vec3(texture(material.diffuse, TexCoords)) * light.Kd * light.color * (max(dot(lightVector, normal), 0.0f)) ;
-
-	// Specular
-	vec3 viewDir = normalize(viewPos - Position);
-	vec3 reflectedDir = reflect(-lightVector, normal);
-	vec3 specularComponent = vec3(texture(material.specular, TexCoords)) * light.Ks * light.color * pow(max(dot(reflectedDir, viewDir), 0.0f), material.shininess);
-
-	vec3 phong = (ambientComponent + diffuseComponent + specularComponent) * light_attenuation(length(light.position - Position));
-
- 	color = vec4(phong, 1.0f);
-}
-
+/*
 void spotlight_lighting(){
 	vec3 spotDirection = normalize(Position - light.position);
 	float theta = dot(light.direction, spotDirection);
@@ -84,9 +90,68 @@ void spotlight_lighting(){
 
 	color = vec4(phong, 1.0f);
 }
-
+*/
 
 void main()
 {
-	spotlight_lighting();
+	vec3 n_normal = normalize(Normal);
+	vec3 n_view = normalize(viewPos - FragPosition);
+
+	vec3 directionalContribution;//CalculateDirectionalLight(directionalLight, n_normal, n_view);
+	vec3 spotLightContribution = CalculateSpotLight(spotLight, n_normal, FragPosition, n_view);
+
+	vec3 pointContribution;
+	for (int l = 0; l < NR_POINT_LIGHTS; ++l){
+		pointContribution+= CalculatePointLight(pointLights[l], n_normal, FragPosition, n_view);
+	}
+
+
+	vec3 result = directionalContribution + pointContribution + spotLightContribution;
+
+	color = vec4(result, 1.0);
+}
+
+vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 view){
+	vec3 n_light = normalize(-light.direction);
+	vec3 reflected = reflect(-n_light, normal);
+
+	vec3 ambientComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Ka;
+	vec3 diffuseComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Kd * (max(dot(n_light, normal), 0.0f)) ;
+	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(reflected, view), 0.0f), material.shininess);
+
+	return (ambientComponent + diffuseComponent + specularComponent);
+}
+
+vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 view){
+	vec3 n_light = normalize(light.position - fragPos);
+	vec3 reflected = reflect(-n_light, normal);
+
+	vec3 ambientComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Ka;
+	vec3 diffuseComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Kd * (max(dot(n_light, normal), 0.0f)) ;
+	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(reflected, view), 0.0f), material.shininess);
+
+	float distance = length(light.position - fragPos);
+
+	return (ambientComponent + diffuseComponent + specularComponent) * CalculatePointLightAttenuation(light.Kc, light.Kl, light.Kq, distance);
+}
+
+float CalculatePointLightAttenuation(float Kc, float Kl, float Kq, float distance){
+	return 1.0f / ((Kc + Kl * distance) + (Kq * pow(distance,2)));
+}
+
+vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 view){
+	vec3 n_light = normalize(light.position - fragPos);
+	vec3 reflected = reflect(-n_light, normal);
+
+	vec3 spotDirection = normalize(fragPos - light.position);
+	float theta = dot(light.direction, spotDirection);
+	float epsilon = light.innerCutOff - light.outerCutOff;
+	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+	// Phong
+	vec3 ambientComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Ka;
+	vec3 diffuseComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Kd * (max(dot(n_light, normal), 0.0f)) ;
+	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(reflected, view), 0.0f), material.shininess);
+
+	return (ambientComponent + (diffuseComponent + specularComponent) * intensity) * CalculatePointLightAttenuation(light.Kc, light.Kl, light.Kq, length(light.position - fragPos));
 }
