@@ -247,7 +247,7 @@ int main()
 
             // Light
 
-        //GLint lightDirLoc = glGetUniformLocation(basicShader.Program, "light.direction");
+        GLint lightDirLoc = glGetUniformLocation(basicShader.Program, "light.direction");
         GLint lightPosLoc = glGetUniformLocation(basicShader.Program, "light.position");
         GLint lightAmbientLoc = glGetUniformLocation(basicShader.Program, "light.Ka");
         GLint lightDiffuseLoc = glGetUniformLocation(basicShader.Program, "light.Kd");
@@ -256,9 +256,9 @@ int main()
         GLint lightLinearLoc = glGetUniformLocation(basicShader.Program, "light.Kl");
         GLint lightQuadraticLoc = glGetUniformLocation(basicShader.Program, "light.Kq");
         GLint lightColorLoc = glGetUniformLocation(basicShader.Program, "light.color");
+        GLint lightCutOffLoc = glGetUniformLocation(basicShader.Program, "light.cutOff");
+        GLint lightOuterCutOffLoc = glGetUniformLocation(basicShader.Program, "light.outerCutOff");
 
-        glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-        //glUniform3f(lightDirLoc, lightDir.x, lightDir.y, lightDir.z);
         glUniform3f(lightAmbientLoc,  0.2f, 0.2f, 0.2f);
         glUniform3f(lightDiffuseLoc,  0.5f, 0.5f, 0.5f);
         glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);  
@@ -266,6 +266,11 @@ int main()
         glUniform1f(lightLinearLoc, 0.09f);
         glUniform1f(lightQuadraticLoc, 0.032f);
         glUniform3f(lightColorLoc, lightColor.x, lightColor.y, lightColor.z);  
+        // Spotlight
+        glUniform3f(lightPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
+        glUniform3f(lightDirLoc, camera.Front.x, camera.Front.y, camera.Front.z);
+        glUniform1f(lightCutOffLoc, glm::cos(glm::radians(12.5f)));
+        glUniform1f(lightOuterCutOffLoc, glm::cos(glm::radians(18.5f)));
 
         // Create camera transformations
         glm::mat4 view = camera.GetViewMatrix();

@@ -8,7 +8,8 @@ struct Material {
 struct Light {
 	vec3 position;
 	vec3 color;
-	//vec3 position;
+	float cutOff;
+	float outerCutOff;
 	vec3 direction;
     vec3 Ka;
     vec3 Kd;
@@ -32,12 +33,13 @@ in vec2 TexCoords;
 out vec4 color;
 
 
+
+
 float light_attenuation(float d){
 	return 1 / ((light.Kc + light.Kl * d) + (light.Kq * pow(d,2)));
 }
 
-void main()
-{
+void phong_lighting(){
 	// Ambient
 	//vec3 ambientComponent = vec3(texture(material.diffuse, TexCoords)) * light.Ka;
 	vec3 ambientComponent = vec3(texture(material.diffuse, TexCoords)) * light.Ka;
@@ -56,4 +58,35 @@ void main()
 	vec3 phong = (ambientComponent + diffuseComponent + specularComponent) * light_attenuation(length(light.position - Position));
 
  	color = vec4(phong, 1.0f);
+}
+
+void spotlight_lighting(){
+	vec3 spotDirection = normalize(Position - light.position);
+	float theta = dot(light.direction, spotDirection);
+	float epsilon = light.cutOff - light.outerCutOff;
+	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+	// Phong
+	vec3 ambientComponent = vec3(texture(material.diffuse, TexCoords)) * light.Ka;
+
+	// Diffuse
+	vec3 normal = normalize(Normal);
+	vec3 lightVector = normalize(light.position - Position);
+	//vec3 diffuseComponent = vec3(texture(material.diffuse, TexCoords)) * light.Kd * light.color * (max(dot(lightVector, normal), 0.0f)) ;
+	vec3 diffuseComponent = vec3(texture(material.diffuse, TexCoords)) * light.Kd * light.color * (max(dot(lightVector, normal), 0.0f)) ;
+
+	// Specular
+	vec3 viewDir = normalize(viewPos - Position);
+	vec3 reflectedDir = reflect(-lightVector, normal);
+	vec3 specularComponent = vec3(texture(material.specular, TexCoords)) * light.Ks * light.color * pow(max(dot(reflectedDir, viewDir), 0.0f), material.shininess);
+
+	vec3 phong = (ambientComponent + (diffuseComponent + specularComponent) * intensity) * light_attenuation(length(light.position - Position));
+
+	color = vec4(phong, 1.0f);
+}
+
+
+void main()
+{
+	spotlight_lighting();
 }
