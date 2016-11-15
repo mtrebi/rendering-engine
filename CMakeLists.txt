@@ -15,6 +15,7 @@ include_directories (
 
 set(ALL_LIBS
 	SOIL
+	assimp
 	glfw
 	GLEW
 		${OPENGL_LIBRARY}
@@ -40,9 +41,3 @@ add_compile_options(
 # main.cpp
 add_executable(main ${SOURCES})
 target_link_libraries(main ${ALL_LIBS})
-
-
-#[[
-SOURCE_GROUP(common REGULAR_EXPRESSION ".*/common/.*" )
-SOURCE_GROUP(shaders REGULAR_EXPRESSION ".*/.*shader$" )
-]]

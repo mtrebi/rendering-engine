@@ -2,6 +2,7 @@ include_directories(
 	lib/glfw-3.2.1/include/GLFW/
 	lib/glew-2.0.0/include/
 	lib/SOIL/src/
+	lib/assimp-3.1.1/include/assimp/
 )
 
 ### GLFW ###
@@ -25,8 +26,6 @@ add_library( GLEW STATIC
 	${GLEW_SOURCE}
 )
 
-
-
 ### SOIL ###
 
 # Source Files
@@ -46,5 +45,9 @@ SET(SOIL_HDRS
     SOIL/src/stbi_DDS_aug.h
     SOIL/src/SOIL.c
 )
+
+### ASSIMP ###
+add_subdirectory (assimp-3.1.1)
+
 
 ADD_LIBRARY(SOIL_Static STATIC ${SOIL_SRCS} ${SOIL_HDRS})
