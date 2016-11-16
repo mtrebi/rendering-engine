@@ -1,6 +1,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "shaders/Shader.h"
+#include <assimp/types.h>
 
 struct Vertex {
 	glm::vec3 position;
@@ -10,7 +11,8 @@ struct Vertex {
 
 struct Texture {
 	GLuint id;
-	enum { DIFFUSE, SPECULAR } type;
+	enum Type { DIFFUSE, SPECULAR } type;
+	aiString path; // Store path of texture to avoid loading it more than once
 };
 
 class Mesh {

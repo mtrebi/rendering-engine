@@ -22,7 +22,7 @@ set(ALL_LIBS
 
 )
 
-set(SOURCES src/main.cpp src/Camera.cpp src/Mesh.cpp)
+set(SOURCES src/main.cpp src/Camera.cpp src/Mesh.cpp src/Model.cpp)
 
 
 add_definitions(
