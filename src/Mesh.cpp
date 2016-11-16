@@ -32,11 +32,11 @@ void Mesh::initialize(){
     	// Vertex Normals
     glEnableVertexAttribArray(1);	
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 
-                         (GLvoid*)offsetof(Vertex, Normal));
+                         (GLvoid*)offsetof(Vertex, normal));
     	// Vertex Texture Coords
     glEnableVertexAttribArray(2);	
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 
-                         (GLvoid*)offsetof(Vertex, TexCoords));
+                         (GLvoid*)offsetof(Vertex, texCoords));
 
     // Unbind
     glBindVertexArray(0);
