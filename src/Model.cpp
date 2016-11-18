@@ -44,6 +44,7 @@ void Model::loadModel(const std::string path){
 void Model::processNode(aiNode* node, const aiScene* scene){
 	// Process all meshes of the node
 	for (GLuint i = 0; i < node->mNumMeshes; ++i){
+
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		m_meshes.push_back(processMesh(mesh, scene));
 	}
@@ -74,7 +75,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene){
 		vertex.normal.z = mesh->mNormals[i].z; 
 
 		// Textures
-		if (mesh->mTextureCoords[0]){ // Has texture coords
+		if (mesh->mTextureCoords){ // Has texture coords
 			vertex.texCoords.x = mesh->mTextureCoords[0][i].x;
 			vertex.texCoords.y = mesh->mTextureCoords[0][i].y;
 		}else {
