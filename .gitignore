@@ -1,5 +1,5 @@
 # Build
-/build
+build
 main
 # Cmake
 CMakeCache.txt
