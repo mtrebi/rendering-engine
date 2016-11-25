@@ -65,33 +65,6 @@ vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 view);
 
 float CalculatePointLightAttenuation(float Kc, float Kl, float Kq, float distance);
 
-/*
-void spotlight_lighting(){
-	vec3 spotDirection = normalize(Position - light.position);
-	float theta = dot(light.direction, spotDirection);
-	float epsilon = light.cutOff - light.outerCutOff;
-	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
-
-	// Phong
-	vec3 ambientComponent = vec3(texture(material.diffuse, TexCoords)) * light.Ka;
-
-	// Diffuse
-	vec3 normal = normalize(Normal);
-	vec3 lightVector = normalize(light.position - Position);
-	//vec3 diffuseComponent = vec3(texture(material.diffuse, TexCoords)) * light.Kd * light.color * (max(dot(lightVector, normal), 0.0f)) ;
-	vec3 diffuseComponent = vec3(texture(material.diffuse, TexCoords)) * light.Kd * light.color * (max(dot(lightVector, normal), 0.0f)) ;
-
-	// Specular
-	vec3 viewDir = normalize(viewPos - Position);
-	vec3 reflectedDir = reflect(-lightVector, normal);
-	vec3 specularComponent = vec3(texture(material.specular, TexCoords)) * light.Ks * light.color * pow(max(dot(reflectedDir, viewDir), 0.0f), material.shininess);
-
-	vec3 phong = (ambientComponent + (diffuseComponent + specularComponent) * intensity) * light_attenuation(length(light.position - Position));
-
-	color = vec4(phong, 1.0f);
-}
-*/
-
 void main()
 {
 	vec3 n_normal = normalize(Normal);
@@ -113,22 +86,26 @@ void main()
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 view){
 	vec3 n_light = normalize(-light.direction);
-	vec3 reflected = reflect(-n_light, normal);
+	//vec3 reflected = reflect(-n_light, normal);
+	vec3 halfway = normalize(-light.direction + view)
+
 
 	vec3 ambientComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Ka;
 	vec3 diffuseComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Kd * (max(dot(n_light, normal), 0.0f)) ;
-	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(reflected, view), 0.0f), material.shininess);
+	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(halfway, view), 0.0f), material.shininess);
 
 	return (ambientComponent + diffuseComponent + specularComponent);
 }
 
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 view){
 	vec3 n_light = normalize(light.position - fragPos);
-	vec3 reflected = reflect(-n_light, normal);
+	//vec3 reflected = reflect(-n_light, normal);
+	vec3 halfway = normalize(-light.direction + view)
+
 
 	vec3 ambientComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Ka;
 	vec3 diffuseComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Kd * (max(dot(n_light, normal), 0.0f)) ;
-	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(reflected, view), 0.0f), material.shininess);
+	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(halfway, view), 0.0f), material.shininess);
 
 	float distance = length(light.position - fragPos);
 
@@ -141,7 +118,8 @@ float CalculatePointLightAttenuation(float Kc, float Kl, float Kq, float distanc
 
 vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 view){
 	vec3 n_light = normalize(light.position - fragPos);
-	vec3 reflected = reflect(-n_light, normal);
+	//vec3 reflected = reflect(-n_light, normal);
+	vec3 halfway = normalize(-light.direction + view)
 
 	vec3 spotDirection = normalize(fragPos - light.position);
 	float theta = dot(light.direction, spotDirection);
@@ -151,7 +129,7 @@ vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 view){
 	// Phong
 	vec3 ambientComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Ka;
 	vec3 diffuseComponent 	= vec3(texture(material.diffuse, 	TexCoords)) * light.Kd * (max(dot(n_light, normal), 0.0f)) ;
-	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(reflected, view), 0.0f), material.shininess);
+	vec3 specularComponent 	= vec3(texture(material.specular, 	TexCoords)) * light.Ks * pow(max(dot(halfway, view), 0.0f), material.shininess);
 
 	return (ambientComponent + (diffuseComponent + specularComponent) * intensity) * CalculatePointLightAttenuation(light.Kc, light.Kl, light.Kq, length(light.position - fragPos));
 }
