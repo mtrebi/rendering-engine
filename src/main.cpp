@@ -20,24 +20,24 @@
 #include "Camera.h"
 #include "Model.h"
 
-// Properties
-const GLuint screenWidth = 800, screenHeight = 600;
-
 // Function prototypes
 GLFWwindow* initWindow(const GLuint width, const GLuint height);
-void setupOpenGLFlags();
+GLuint loadTexture(GLchar* path);
 void clearBuffers();
 void calculateFrameTime();
 void calculateCameraMovement();
+void setupOpenGLFlags();
 void setupProjectionMatrix(Shader shader);
 void setupViewMatrix(Shader shader);
 void setupModelMatrix(Shader shader);
 
+// Callbacks
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-GLuint loadTexture(GLchar* path);
+// Attributes
+const GLuint screenWidth = 800, screenHeight = 600;
 
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f)); 
