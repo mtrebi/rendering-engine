@@ -1,5 +1,5 @@
 #include <iostream>
-#include <string>
+
 // GLEW
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -24,6 +24,9 @@
 const GLuint screenWidth = 800, screenHeight = 600;
 
 // Function prototypes
+GLFWwindow* initWindow(const GLuint width, const GLuint height);
+void setupOpenGLFlags();
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -40,17 +43,19 @@ GLfloat deltaTime = 0.0f,   // Time between current frame and last frame
         lastFrame = 0.0f;   // Time of last frame
 bool firstMouse = false;
 
-const string shaderLoc = "../src/shaders/advanced.vs", "../src/shaders/advanced.fs";
+GLchar* basicVSLocation = "../src/shaders/advanced.vs";
+GLchar* basicFSLocation = "../src/shaders/advanced.fs";
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
-    GLFWwindow* window = initWindow();
-
-    // Build and compile our shader program
-    Shader shader();
-    Shader shaderSingleColor("../src/shaders/advanced.vs", "../src/shaders/single_color.fs");
-
+    GLFWwindow* window = initWindow(screenWidth, screenHeight);
+    
+    setupOpenGLFlags();
+    
+    Shader basicShader = Shader(basicVSLocation, basicFSLocation);
+    
+    
     GLfloat cubeVertices[] = {
         // Positions          // Texture Coords
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -157,75 +162,40 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // Get the uniform locations
-        shader.Use();
+        basicShader.Use();
 
        // Set uniforms
-        shaderSingleColor.Use();        
+        //shaderSingleColor.Use();        
         glm::mat4 model;
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
-        glUniformMatrix4fv(glGetUniformLocation(shaderSingleColor.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(shaderSingleColor.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        shader.Use(); 
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
+        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         // Draw objects
         // Draw floor as normal, we only care about the containers. The floor should NOT fill the stencil buffer so we set its mask to 0x00
-        glStencilMask(0x00);
+
         // Floor
         glBindVertexArray(planeVAO);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
         model = glm::mat4();
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 6);       
         glBindVertexArray(0);   
 
         // == =============
         // 1st. Render pass, draw objects as normal, filling the stencil buffer
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);        
         // Cubes
         glBindVertexArray(cubeVAO);
         glBindTexture(GL_TEXTURE_2D, cubeTexture);  
         model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);   
-
-        // == =============
-        // 2nd. Render pass, now draw slightly scaled versions of the objects, this time disabling stencil writing.
-        // Because stencil buffer is now filled with several 1s. The parts of the buffer that are 1 are now not drawn, thus only drawing 
-        // the objects' size differences, making it look like borders.
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-        glDisable(GL_DEPTH_TEST);
-        shaderSingleColor.Use();
-        GLfloat scale = 1.1;
-        // Cubes
-        glBindVertexArray(cubeVAO);
-        glBindTexture(GL_TEXTURE_2D, cubeTexture);  
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));       
-        model = glm::scale(model, glm::vec3(scale, scale, scale));
-        glUniformMatrix4fv(glGetUniformLocation(shaderSingleColor.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        model = glm::mat4();        
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f)); 
-        model = glm::scale(model, glm::vec3(scale, scale, scale));
-        glUniformMatrix4fv(glGetUniformLocation(shaderSingleColor.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);   
-        glStencilMask(0xFF);
-        glEnable(GL_DEPTH_TEST);
-
-            
-
 
         // Swap the buffers
         glfwSwapBuffers(window);
@@ -235,7 +205,7 @@ int main()
     return 0;
 }
 
-GLFWwindow* initWindow(const int width, const int height){
+GLFWwindow* initWindow(const GLuint width, const GLuint height){
     // Init GLFW
     glfwInit();
     // Set all the required options for GLFW
@@ -264,6 +234,12 @@ GLFWwindow* initWindow(const int width, const int height){
     glViewport(0, 0, width, height);
     
     return window;
+}
+
+void setupOpenGLFlags(){
+    //glEnable(GL_DEPTH_TEST);    
+    //glEnable(GL_STENCIL_TEST);
+    //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
 void calculate_times(){
