@@ -26,6 +26,7 @@ const GLuint screenWidth = 800, screenHeight = 600;
 // Function prototypes
 GLFWwindow* initWindow(const GLuint width, const GLuint height);
 void setupOpenGLFlags();
+void clearBuffers();
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -54,6 +55,7 @@ int main()
     setupOpenGLFlags();
     
     Shader basicShader = Shader(basicVSLocation, basicFSLocation);
+    
     
     
     GLfloat cubeVertices[] = {
@@ -139,14 +141,6 @@ int main()
     GLuint cubeTexture = loadTexture("../assets/textures/pattern4diffuseblack.png");
     GLuint floorTexture = loadTexture("../assets/textures/Metal.png");
 
-    // Draw in wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    glEnable(GL_DEPTH_TEST);    
-    glEnable(GL_STENCIL_TEST);
-
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
     // Game loop
     while(!glfwWindowShouldClose(window))
     {
@@ -157,10 +151,8 @@ int main()
         glfwPollEvents();
         do_movement();
 
-        // Clear the colorbuffer
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
+        clearBuffers();
+        
         // Get the uniform locations
         basicShader.Use();
 
@@ -240,6 +232,11 @@ void setupOpenGLFlags(){
     //glEnable(GL_DEPTH_TEST);    
     //glEnable(GL_STENCIL_TEST);
     //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+}
+
+void clearBuffers(){
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void calculate_times(){
