@@ -27,12 +27,16 @@ const GLuint screenWidth = 800, screenHeight = 600;
 GLFWwindow* initWindow(const GLuint width, const GLuint height);
 void setupOpenGLFlags();
 void clearBuffers();
+void calculateFrameTime();
+void calculateCameraMovement();
+void setupProjectionMatrix(Shader shader);
+void setupViewMatrix(Shader shader);
+void setupModelMatrix(Shader shader);
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void do_movement();
-void calculate_times();
+
 GLuint loadTexture(GLchar* path);
 
 // Camera
@@ -44,152 +48,38 @@ GLfloat deltaTime = 0.0f,   // Time between current frame and last frame
         lastFrame = 0.0f;   // Time of last frame
 bool firstMouse = false;
 
-GLchar* basicVSLocation = "../src/shaders/advanced.vs";
-GLchar* basicFSLocation = "../src/shaders/advanced.fs";
+GLchar* basicVSPath = "../src/shaders/model.vs";
+GLchar* basicFSPath = "../src/shaders/model.fs";
+
+GLchar* nanosuitPath = "../assets/models/nanosuit/nanosuit.obj";
 
 // The MAIN function, from here we start the application and run the game loop
-int main()
-{
+int main(){
+
     GLFWwindow* window = initWindow(screenWidth, screenHeight);
     
     setupOpenGLFlags();
     
-    Shader basicShader = Shader(basicVSLocation, basicFSLocation);
+    Shader basicShader = Shader(basicVSPath, basicFSPath);
     
+    Model nanosuitModel = Model(nanosuitPath);
     
-    
-    GLfloat cubeVertices[] = {
-        // Positions          // Texture Coords
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
-    GLfloat planeVertices[] = {
-        // Positions            // Texture Coords (note we set these higher than 1 that together with GL_REPEAT as texture wrapping mode will cause the floor texture to repeat)
-        5.0f,  -0.5f,  5.0f,  2.0f, 0.0f,
-        -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-
-        5.0f,  -0.5f,  5.0f,  2.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-        5.0f,  -0.5f, -5.0f,  2.0f, 2.0f                                
-    };
-    // Setup cube VAO
-    GLuint cubeVAO, cubeVBO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &cubeVBO);
-    glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glBindVertexArray(0);
-    // Setup plane VAO
-    GLuint planeVAO, planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glBindVertexArray(0);
-
-    // Load textures
-    GLuint cubeTexture = loadTexture("../assets/textures/pattern4diffuseblack.png");
-    GLuint floorTexture = loadTexture("../assets/textures/Metal.png");
-
     // Game loop
     while(!glfwWindowShouldClose(window))
     {
         // Set frame time
-        calculate_times();
-
-        // Check and call events
+        calculateFrameTime();
         glfwPollEvents();
-        do_movement();
-
+        calculateCameraMovement();
         clearBuffers();
         
-        // Get the uniform locations
-        basicShader.Use();
+        basicShader.Use();   
+        
+        setupProjectionMatrix(basicShader);
+        setupViewMatrix(basicShader);
+        setupModelMatrix(basicShader);
 
-       // Set uniforms
-        //shaderSingleColor.Use();        
-        glm::mat4 model;
-        glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
-        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-        // Draw objects
-        // Draw floor as normal, we only care about the containers. The floor should NOT fill the stencil buffer so we set its mask to 0x00
-
-        // Floor
-        glBindVertexArray(planeVAO);
-        glBindTexture(GL_TEXTURE_2D, floorTexture);
-        model = glm::mat4();
-        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glDrawArrays(GL_TRIANGLES, 0, 6);       
-        glBindVertexArray(0);   
-
-        // == =============
-        // 1st. Render pass, draw objects as normal, filling the stencil buffer
-        // Cubes
-        glBindVertexArray(cubeVAO);
-        glBindTexture(GL_TEXTURE_2D, cubeTexture);  
-        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-        glUniformMatrix4fv(glGetUniformLocation(basicShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);   
-
-        // Swap the buffers
+        nanosuitModel.draw(basicShader);
         glfwSwapBuffers(window);
     }
     // Properly de-allocate all resources once they've outlived their purpose
@@ -229,7 +119,7 @@ GLFWwindow* initWindow(const GLuint width, const GLuint height){
 }
 
 void setupOpenGLFlags(){
-    //glEnable(GL_DEPTH_TEST);    
+    glEnable(GL_DEPTH_TEST);    
     //glEnable(GL_STENCIL_TEST);
     //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
@@ -239,13 +129,13 @@ void clearBuffers(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void calculate_times(){
+void calculateFrameTime(){
     GLfloat currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 }
 
-void do_movement() {
+void calculateCameraMovement() {
     // Camera controls
     if(keys[GLFW_KEY_W])
         camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -255,6 +145,23 @@ void do_movement() {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if(keys[GLFW_KEY_D])
         camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+void setupProjectionMatrix(Shader shader) {
+    glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
+    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void setupViewMatrix(Shader shader) {
+    glm::mat4 view = camera.GetViewMatrix();
+    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+}
+
+void setupModelMatrix(Shader shader){
+    glm::mat4 model;
+    model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 }
 
 // Is called whenever a key is pressed/released via GLFW
