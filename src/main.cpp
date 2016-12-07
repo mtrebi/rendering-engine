@@ -34,6 +34,7 @@ void setupProjectionMatrix(Shader shader);
 void setupViewMatrix(Shader shader);
 void setupModelMatrix(Shader shader, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 translate = glm::vec3(1.0f, 1.0f, 1.0f));
 
+void moveLight();
 // Callbacks
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -59,7 +60,7 @@ GLchar* phongFSPath = "../src/shaders/phong_shader.fs";
 
 GLuint VBO, lightVAO, cubeVAO;
 
-glm::vec3 lightPosition = glm::vec3(1.2f, 5.0f, 2.0f);
+glm::vec3 lightPosition = glm::vec3(1.2f, 5.0f, 1.0f);
 glm::vec3 lightColor = glm::vec3(1.0f);
 glm::vec3 objColor = glm::vec3(1.0f, 0.0f, 0.0f);
 
@@ -67,7 +68,7 @@ glm::vec3 objColor = glm::vec3(1.0f, 0.0f, 0.0f);
 const GLfloat Ka = 0.2f;
 const GLfloat Kd = 0.4f;
 const GLfloat Ks = 0.4f;
-const GLuint shininess = 10;
+const GLuint shininess = 200;
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){
@@ -90,6 +91,8 @@ int main(){
         calculateCameraMovement();
         clearBuffers();
              
+        moveLight();
+        
         lightShader.Use();
         setupProjectionMatrix(lightShader);
         setupViewMatrix(lightShader);
@@ -169,6 +172,13 @@ void calculateFrameTime(){
     GLfloat currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
+}
+
+void moveLight(){
+    GLfloat currentFrame = glfwGetTime();
+    lightPosition.x = 1.0f + (sin(glfwGetTime())) * 2.0f;
+    lightPosition.y = 1.0f + (cos(glfwGetTime())) * 2.0f;
+
 }
 
 void calculateCameraMovement() {
@@ -256,9 +266,14 @@ void setupPhongVariables(Shader shader){
     glUniform3f(glGetUniformLocation(shader.Program, "u_ObjColor"), objColor.x, objColor.y, objColor.z);
     glUniform3f(glGetUniformLocation(shader.Program, "u_LightColor"), lightColor.x, lightColor.y, lightColor.z);
     glUniform3f(glGetUniformLocation(shader.Program, "u_LightPos"), lightPosition.x, lightPosition.y, lightPosition.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_CameraPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 
+    
     glUniform1f(glGetUniformLocation(shader.Program, "u_Ka"), Ka);
     glUniform1f(glGetUniformLocation(shader.Program, "u_Kd"), Kd);
+    glUniform1f(glGetUniformLocation(shader.Program, "u_Ks"), Ks);
+    glUniform1f(glGetUniformLocation(shader.Program, "u_shininess"), shininess);
+
 }
 
 void setupProjectionMatrix(Shader shader) {
