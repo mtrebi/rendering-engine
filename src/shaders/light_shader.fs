@@ -1,9 +1,7 @@
-# version 420 core
+# version 330 core
 
 out vec4 outColor;
 
-
-
-void main() {
-    outColor = vec4 (1.0f);
+void main(){
+    outColor = vec4(1.0f);
 }

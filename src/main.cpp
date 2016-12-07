@@ -31,8 +31,7 @@ void setupData();
 void setupOpenGLFlags();
 void setupProjectionMatrix(Shader shader);
 void setupViewMatrix(Shader shader);
-void setupModelMatrix(Shader shader);
-void drawData(Shader shader);
+void setupModelMatrix(Shader shader, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 translate = glm::vec3(1.0f, 1.0f, 1.0f));
 
 // Callbacks
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -57,7 +56,7 @@ GLchar* lightFSPath = "../src/shaders/light_shader.fs";
 GLchar* phongVSPath = "../src/shaders/phong_shader.vs";
 GLchar* phongFSPath = "../src/shaders/phong_shader.fs";
 
-GLuint VBO, VAO;
+GLuint VBO, lightVAO, cubeVAO;
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){
@@ -68,7 +67,7 @@ int main(){
     
     setupData();
     
-    //Shader lightShader = Shader(lightVSPath, lightFSPath);
+    Shader lightShader = Shader(lightVSPath, lightFSPath);
     Shader phongShader = Shader(phongVSPath, phongFSPath);
 
     // Game loop
@@ -79,13 +78,26 @@ int main(){
         glfwPollEvents();
         calculateCameraMovement();
         clearBuffers();
-                
+             
+        setupProjectionMatrix(lightShader);
+        setupViewMatrix(lightShader);
+        setupModelMatrix(lightShader, glm::vec3(0.2f), glm::vec3(1.2f, 1.0f, 2.0f));
+
+        lightShader.Use();
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        
+        
         setupProjectionMatrix(phongShader);
         setupViewMatrix(phongShader);
         setupModelMatrix(phongShader);
-
-        drawData(phongShader);
-
+        
+        phongShader.Use();
+        glBindVertexArray(cubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        
         glfwSwapBuffers(window);
     }
     terminate();
@@ -124,7 +136,8 @@ GLFWwindow* initialize(const GLuint width, const GLuint height){
 }
 
 void terminate(){
-    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &lightVAO);
+    glDeleteVertexArrays(1, &cubeVAO);
     glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
@@ -205,27 +218,23 @@ void setupData() {
     };
     
     glGenBuffers(1, &VBO);
-    glGenVertexArrays(1, &VAO);
+    glGenVertexArrays(1, &lightVAO);
+    glGenVertexArrays(1, &cubeVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER ,VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     
-    glBindVertexArray(VAO);
-
+    glBindVertexArray(cubeVAO);    
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);   
+    glEnableVertexAttribArray(0);
+    
+    glBindVertexArray(lightVAO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);   
     glEnableVertexAttribArray(0);
     
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);    
 }
-
-void drawData(Shader shader){
-    shader.Use();
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0);
-}
-
 
 void setupProjectionMatrix(Shader shader) {
     glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
@@ -237,10 +246,10 @@ void setupViewMatrix(Shader shader) {
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "uView"), 1, GL_FALSE, glm::value_ptr(view));
 }
 
-void setupModelMatrix(Shader shader){
+void setupModelMatrix(Shader shader, glm::vec3 scale, glm::vec3 translate){
     glm::mat4 model;
-    //model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+    model = glm::translate(model, translate);
+    model = glm::scale(model, scale);
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
 }
 

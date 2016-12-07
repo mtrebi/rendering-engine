@@ -1,7 +1,10 @@
 # version 330 core
+layout (location = 0) in vec3 inPosition;
 
-layout (location = 0) in vec3 iPosition;
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProjection;
 
 void main() {
-    gl_Position = vec4(iPosition.x, iPosition.y, iPosition.z, 1);
+    gl_Position = uProjection * uView * uModel * vec4(inPosition, 1.0f);
 }
