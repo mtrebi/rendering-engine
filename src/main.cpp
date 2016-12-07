@@ -55,8 +55,8 @@ bool firstMouse = false;
 GLchar* lightVSPath = "../src/shaders/light_shader.vs";
 GLchar* lightFSPath = "../src/shaders/light_shader.fs";
 
-GLchar* phongVSPath = "../src/shaders/phong_shader.vs";
-GLchar* phongFSPath = "../src/shaders/phong_shader.fs";
+GLchar* gouraudVSPath = "../src/shaders/gouraud.vs";
+GLchar* gouraudFSPath = "../src/shaders/gouraud.fs";
 
 GLuint VBO, lightVAO, cubeVAO;
 
@@ -84,7 +84,7 @@ int main(){
     setupData();
     
     Shader lightShader = Shader(lightVSPath, lightFSPath);
-    Shader phongShader = Shader(phongVSPath, phongFSPath);
+    Shader gouraudShader = Shader(gouraudVSPath, gouraudFSPath);
 
     // Game loop
     while(!glfwWindowShouldClose(window))
@@ -106,11 +106,11 @@ int main(){
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
                
-        phongShader.Use();
-        setupPhongVariables(phongShader);
-        setupProjectionMatrix(phongShader);
-        setupViewMatrix(phongShader);
-        setupModelMatrix(phongShader);
+        gouraudShader.Use();
+        setupPhongVariables(gouraudShader);
+        setupProjectionMatrix(gouraudShader);
+        setupViewMatrix(gouraudShader);
+        setupModelMatrix(gouraudShader);
         
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
