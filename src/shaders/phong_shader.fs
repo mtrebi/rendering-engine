@@ -1,20 +1,24 @@
 # version 330 core
 
-out vec4 out_Color;
+in vec3 FragPos;
+in vec3 Normal;
 
+out vec4 out_Color;
 
 uniform vec3 u_ObjColor;
 uniform vec3 u_LightColor;
+uniform vec3 u_LightPos;
 
 uniform float u_Ka;
+uniform float u_Kd;
 
 const vec3 ambientComponent(const vec3 lightColor){
-    return 0.2 * lightColor;
+    return u_Ka * lightColor;
 }
 
 const vec3 diffuseComponent(const vec3 lightColor){
-    //return u_Ka * color;
-    return vec3(0.0f);
+    vec3 lightDir = normalize(u_LightPos - FragPos); 
+    return u_Kd * max(dot(lightDir, Normal),0) * lightColor;
 }
 
 const vec3 specularComponent(const vec3 lightColor){
