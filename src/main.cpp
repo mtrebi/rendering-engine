@@ -58,6 +58,8 @@ GLchar* phongFSPath = "../src/shaders/phong_shader.fs";
 
 GLuint VBO, lightVAO, cubeVAO;
 
+glm::vec3 lightPosition = glm::vec3(1.2f, 5.0f, 2.0f);
+
 // The MAIN function, from here we start the application and run the game loop
 int main(){
 
@@ -79,21 +81,20 @@ int main(){
         calculateCameraMovement();
         clearBuffers();
              
+        lightShader.Use();
         setupProjectionMatrix(lightShader);
         setupViewMatrix(lightShader);
-        setupModelMatrix(lightShader, glm::vec3(0.2f), glm::vec3(1.2f, 1.0f, 2.0f));
+        setupModelMatrix(lightShader, glm::vec3(0.2f), lightPosition);
 
-        lightShader.Use();
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
-        
-        
+               
+        phongShader.Use();
         setupProjectionMatrix(phongShader);
         setupViewMatrix(phongShader);
         setupModelMatrix(phongShader);
         
-        phongShader.Use();
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
@@ -247,7 +248,7 @@ void setupViewMatrix(Shader shader) {
 }
 
 void setupModelMatrix(Shader shader, glm::vec3 scale, glm::vec3 translate){
-    glm::mat4 model;
+    glm::mat4 model = glm::mat4();
     model = glm::translate(model, translate);
     model = glm::scale(model, scale);
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
