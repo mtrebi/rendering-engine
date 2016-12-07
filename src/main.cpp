@@ -29,6 +29,7 @@ void calculateFrameTime();
 void calculateCameraMovement();
 void setupData();
 void setupOpenGLFlags();
+void setupPhongConstants(Shader shader);
 void setupProjectionMatrix(Shader shader);
 void setupViewMatrix(Shader shader);
 void setupModelMatrix(Shader shader, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 translate = glm::vec3(1.0f, 1.0f, 1.0f));
@@ -59,6 +60,14 @@ GLchar* phongFSPath = "../src/shaders/phong_shader.fs";
 GLuint VBO, lightVAO, cubeVAO;
 
 glm::vec3 lightPosition = glm::vec3(1.2f, 5.0f, 2.0f);
+glm::vec3 lightColor = glm::vec3(1.0f);
+glm::vec3 objColor = glm::vec3(1.0f, 0.0f, 0.0f);
+
+
+const GLfloat Ka = 0.2f;
+const GLfloat Kd = 0.4f;
+const GLfloat Ks = 0.4f;
+const GLuint shininess = 10;
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){
@@ -91,6 +100,7 @@ int main(){
         glBindVertexArray(0);
                
         phongShader.Use();
+        setupPhongConstants(phongShader);
         setupProjectionMatrix(phongShader);
         setupViewMatrix(phongShader);
         setupModelMatrix(phongShader);
@@ -237,21 +247,27 @@ void setupData() {
     glBindVertexArray(0);    
 }
 
+void setupPhongConstants(Shader shader){
+    glUniform3f(glGetUniformLocation(shader.Program, "u_ObjColor"), objColor.x, objColor.y, objColor.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_LightColor"), lightColor.x, lightColor.y, lightColor.z);
+    glUniform1f(glGetUniformLocation(shader.Program, "u_Ka"), Ka);
+}
+
 void setupProjectionMatrix(Shader shader) {
     glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
-    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "u_Projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 void setupViewMatrix(Shader shader) {
     glm::mat4 view = camera.GetViewMatrix();
-    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "uView"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "u_View"), 1, GL_FALSE, glm::value_ptr(view));
 }
 
 void setupModelMatrix(Shader shader, glm::vec3 scale, glm::vec3 translate){
     glm::mat4 model = glm::mat4();
     model = glm::translate(model, translate);
     model = glm::scale(model, scale);
-    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "u_Model"), 1, GL_FALSE, glm::value_ptr(model));
 }
 
 // Is called whenever a key is pressed/released via GLFW
