@@ -62,13 +62,17 @@ GLuint VBO, lightVAO, cubeVAO;
 
 glm::vec3 lightPosition = glm::vec3(1.2f, 5.0f, 1.0f);
 glm::vec3 lightColor = glm::vec3(1.0f);
-glm::vec3 objColor = glm::vec3(1.0f, 0.0f, 0.0f);
+
+glm::vec3 ambientMaterial = glm::vec3(0.0215f, 0.1745f, 0.0215);
+glm::vec3 diffuseMaterial = glm::vec3(0.07568, 0.61424f,0.07568);
+glm::vec3 specularMaterial = glm::vec3(0.633f, 0.727811f, 0.633f);
+
+glm::vec3 lightAmbientMaterial = glm::vec3(0.2f);
+glm::vec3 lightDiffuseMaterial = glm::vec3(0.5f);
+glm::vec3 lightSpecularMaterial = glm::vec3(1.f);
 
 
-const GLfloat Ka = 0.2f;
-const GLfloat Kd = 0.4f;
-const GLfloat Ks = 0.4f;
-const GLuint shininess = 200;
+const GLfloat shininess = 32.0f;
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){
@@ -263,16 +267,18 @@ void setupData() {
 }
 
 void setupPhongVariables(Shader shader){
-    glUniform3f(glGetUniformLocation(shader.Program, "u_ObjColor"), objColor.x, objColor.y, objColor.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "u_LightColor"), lightColor.x, lightColor.y, lightColor.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "u_LightPos"), lightPosition.x, lightPosition.y, lightPosition.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.position"), lightPosition.x, lightPosition.y, lightPosition.z);
+
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.material.ambientColor"), lightAmbientMaterial.x, lightAmbientMaterial.y, lightAmbientMaterial.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.material.diffuseColor"), lightDiffuseMaterial.x, lightDiffuseMaterial.y, lightDiffuseMaterial.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.material.specularColor"), lightSpecularMaterial.x, lightSpecularMaterial.y, lightSpecularMaterial.z);
+    
     glUniform3f(glGetUniformLocation(shader.Program, "u_CameraPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 
-    
-    glUniform1f(glGetUniformLocation(shader.Program, "u_Ka"), Ka);
-    glUniform1f(glGetUniformLocation(shader.Program, "u_Kd"), Kd);
-    glUniform1f(glGetUniformLocation(shader.Program, "u_Ks"), Ks);
-    glUniform1f(glGetUniformLocation(shader.Program, "u_shininess"), shininess);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Material.ambientColor"), ambientMaterial.x, ambientMaterial.y, ambientMaterial.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Material.diffuseColor"), diffuseMaterial.x, diffuseMaterial.y, diffuseMaterial.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Material.specularColor"), specularMaterial.x, specularMaterial.y, specularMaterial.z);
+    glUniform1f(glGetUniformLocation(shader.Program, "u_Material.shininess"), shininess);
 
 }
 

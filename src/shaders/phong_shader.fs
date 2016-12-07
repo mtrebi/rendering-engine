@@ -1,44 +1,55 @@
 # version 330 core
 
+struct Material {
+    vec3 ambientColor;
+    vec3 diffuseColor;
+    vec3 specularColor;
+
+    float shininess;
+};
+
+struct Light {
+    vec3 position;
+
+    Material material;
+};
+
+
 in vec3 FragPos;
 in vec3 Normal;
 
+
+uniform vec3 u_CameraPos;
+uniform Material u_Material;
+uniform Light u_Light;
+
 out vec4 out_Color;
 
-uniform vec3 u_ObjColor;
-uniform vec3 u_LightColor;
-uniform vec3 u_LightPos;
-uniform vec3 u_CameraPos;
 
-uniform float u_Ka;
-uniform float u_Kd;
-uniform float u_Ks;
-uniform float u_shininess;
-
-const vec3 ambientComponent(const vec3 lightColor){
-    return lightColor * u_Ka;
+const vec3 ambientComponent(){
+    return u_Light.material.ambientColor * u_Material.ambientColor;
 }
 
-const vec3 diffuseComponent(const vec3 lightColor){
-    vec3 lightDir = normalize(u_LightPos - FragPos); 
-    return lightColor * u_Kd * max(dot(lightDir, Normal),0);
+const vec3 diffuseComponent(){
+    vec3 lightDir = normalize(u_Light.position - FragPos); 
+    return u_Light.material.diffuseColor * u_Material.diffuseColor * max(dot(lightDir, Normal),0);
 }
 
-const vec3 specularComponent(const vec3 lightColor){
-    vec3 lightDir = normalize(u_LightPos - FragPos); 
+const vec3 specularComponent(){
+    vec3 lightDir = normalize(u_Light.position - FragPos); 
     vec3 viewDir = normalize(u_CameraPos - FragPos);
     vec3 reflecteDir = reflect(-lightDir ,Normal);
-    return lightColor * u_Ks * pow(max(dot(viewDir, reflecteDir), 0), u_shininess) ;
+    return u_Light.material.specularColor * u_Material.specularColor * pow(max(dot(viewDir, reflecteDir), 0), u_Material.shininess) ;
 }
 
+const vec3 phongShading(){
+    vec3 ambient = ambientComponent();
+    vec3 diffuse = diffuseComponent();
+    vec3 specular = specularComponent();
+
+    return (ambient + diffuse + specular);
+}
 
 void main(){
-    
-    vec3 ambient = ambientComponent(u_LightColor);
-    vec3 diffuse = diffuseComponent(u_LightColor);
-    vec3 specular = specularComponent(u_LightColor);
-
-    vec3 result = (ambient + diffuse + specular) * u_ObjColor;
-
-    out_Color = vec4(result, 1.0f);
+    out_Color = vec4(phongShading(), 1.0f);
 }
