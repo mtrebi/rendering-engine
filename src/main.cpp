@@ -55,10 +55,13 @@ bool firstMouse = false;
 GLchar* lightVSPath = "../src/shaders/light_shader.vs";
 GLchar* lightFSPath = "../src/shaders/light_shader.fs";
 
-GLchar* gouraudVSPath = "../src/shaders/gouraud.vs";
-GLchar* gouraudFSPath = "../src/shaders/gouraud.fs";
+GLchar* phongVSPath = "../src/shaders/phong_texture.vs";
+GLchar* phongFSPath = "../src/shaders/phong_texture.fs";
 
-GLuint VBO, lightVAO, cubeVAO;
+GLchar* diffuseTexturePath = "../assets/textures/container2.png";
+GLchar* specularTexturePath = "../assets/textures/container2_specular.png";
+
+GLuint VBO, lightVAO, cubeVAO, diffuseTexture, specularTexture;
 
 glm::vec3 lightPosition = glm::vec3(1.2f, 5.0f, 1.0f);
 glm::vec3 lightColor = glm::vec3(1.0f);
@@ -84,7 +87,7 @@ int main(){
     setupData();
     
     Shader lightShader = Shader(lightVSPath, lightFSPath);
-    Shader gouraudShader = Shader(gouraudVSPath, gouraudFSPath);
+    Shader phongShader = Shader(phongVSPath, phongFSPath);
 
     // Game loop
     while(!glfwWindowShouldClose(window))
@@ -106,11 +109,17 @@ int main(){
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
                
-        gouraudShader.Use();
-        setupPhongVariables(gouraudShader);
-        setupProjectionMatrix(gouraudShader);
-        setupViewMatrix(gouraudShader);
-        setupModelMatrix(gouraudShader);
+        phongShader.Use();
+        setupPhongVariables(phongShader);
+        setupProjectionMatrix(phongShader);
+        setupViewMatrix(phongShader);
+        setupModelMatrix(phongShader);
+        
+        glActiveTexture(GL_TEXTURE0);	
+        glBindTexture(GL_TEXTURE_2D, diffuseTexture); 
+        
+        glActiveTexture(GL_TEXTURE1);	
+        glBindTexture(GL_TEXTURE_2D, specularTexture); 
         
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -198,48 +207,49 @@ void calculateCameraMovement() {
 }
 
 void setupData() {
-    const GLfloat vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    const  GLfloat vertices[] = {
+        // Positions          // Normals           // Texture Coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
     };
     
     glGenBuffers(1, &VBO);
@@ -251,34 +261,39 @@ void setupData() {
     
     glBindVertexArray(cubeVAO);    
     // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);   
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);   
     glEnableVertexAttribArray(0);
     
     // Normals
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));   
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));   
     glEnableVertexAttribArray(1);
     
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));   
+    glEnableVertexAttribArray(2);
+    
     glBindVertexArray(lightVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);   
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);   
     glEnableVertexAttribArray(0);
     
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);    
+    glBindVertexArray(0);
+
+    diffuseTexture = loadTexture(diffuseTexturePath);
+    specularTexture = loadTexture(specularTexturePath);
 }
 
 void setupPhongVariables(Shader shader){
     glUniform3f(glGetUniformLocation(shader.Program, "u_Light.position"), lightPosition.x, lightPosition.y, lightPosition.z);
 
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.material.ambientColor"), lightAmbientMaterial.x, lightAmbientMaterial.y, lightAmbientMaterial.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.material.diffuseColor"), lightDiffuseMaterial.x, lightDiffuseMaterial.y, lightDiffuseMaterial.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.material.specularColor"), lightSpecularMaterial.x, lightSpecularMaterial.y, lightSpecularMaterial.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.ambientColor"), lightAmbientMaterial.x, lightAmbientMaterial.y, lightAmbientMaterial.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.diffuseColor"), lightDiffuseMaterial.x, lightDiffuseMaterial.y, lightDiffuseMaterial.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.specularColor"), lightSpecularMaterial.x, lightSpecularMaterial.y, lightSpecularMaterial.z);
     
     glUniform3f(glGetUniformLocation(shader.Program, "u_CameraPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Material.ambientColor"), ambientMaterial.x, ambientMaterial.y, ambientMaterial.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Material.diffuseColor"), diffuseMaterial.x, diffuseMaterial.y, diffuseMaterial.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Material.specularColor"), specularMaterial.x, specularMaterial.y, specularMaterial.z);
     glUniform1f(glGetUniformLocation(shader.Program, "u_Material.shininess"), shininess);
+    glUniform1i(glGetUniformLocation(shader.Program, "u_Material.diffuseTexture"), 0);
+    glUniform1i(glGetUniformLocation(shader.Program, "u_Material.specularTexture"), 1);
 
 }
 
