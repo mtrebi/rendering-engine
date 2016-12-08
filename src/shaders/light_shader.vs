@@ -1,10 +1,13 @@
-# version 330 core
-layout (location = 0) in vec3 inPosition;
+# version 420 core
+layout (location = 0) in vec3 l_Position;
 
-uniform mat4 u_Model;
-uniform mat4 u_View;
-uniform mat4 u_Projection;
+layout (std140, binding = 0) uniform Matrices {
+    mat4 Projection;
+    mat4 View;
+};
+
+uniform mat4 Model;
 
 void main() {
-    gl_Position = u_Projection * u_View * u_Model * vec4(inPosition, 1.0f);
+    gl_Position = Projection * View * Model * vec4(l_Position, 1.0f);
 }

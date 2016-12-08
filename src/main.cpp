@@ -30,8 +30,7 @@ void calculateCameraMovement();
 void setupData();
 void setupOpenGLFlags();
 void setupPhongVariables(Shader shader);
-void setupProjectionMatrix(Shader shader);
-void setupViewMatrix(Shader shader);
+void setupProjectionViewMatrix(Shader shader);
 void setupModelMatrix(Shader shader, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 translate = glm::vec3(1.0f, 1.0f, 1.0f));
 
 void moveLight();
@@ -61,7 +60,7 @@ GLchar* phongFSPath = "../src/shaders/phong_texture.fs";
 GLchar* diffuseTexturePath = "../assets/textures/container2.png";
 GLchar* specularTexturePath = "../assets/textures/container2_specular.png";
 
-GLuint VBO, lightVAO, cubeVAO, diffuseTexture, specularTexture;
+GLuint VBO, lightVAO, cubeVAO, diffuseTexture, specularTexture, uboMatrices;
 
 glm::vec3 lightPosition = glm::vec3(1.2f, 5.0f, 1.0f);
 glm::vec3 lightColor = glm::vec3(1.0f);
@@ -75,7 +74,7 @@ glm::vec3 lightDiffuseMaterial = glm::vec3(0.5f);
 glm::vec3 lightSpecularMaterial = glm::vec3(1.f);
 
 
-const GLfloat shininess = 32.0f;
+const GLfloat shininess = 10.0f;
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){
@@ -88,7 +87,7 @@ int main(){
     
     Shader lightShader = Shader(lightVSPath, lightFSPath);
     Shader phongShader = Shader(phongVSPath, phongFSPath);
-
+    
     // Game loop
     while(!glfwWindowShouldClose(window))
     {
@@ -101,8 +100,7 @@ int main(){
         moveLight();
         
         lightShader.Use();
-        setupProjectionMatrix(lightShader);
-        setupViewMatrix(lightShader);
+        setupProjectionViewMatrix(lightShader);
         setupModelMatrix(lightShader, glm::vec3(0.2f), lightPosition);
 
         glBindVertexArray(lightVAO);
@@ -111,8 +109,7 @@ int main(){
                
         phongShader.Use();
         setupPhongVariables(phongShader);
-        setupProjectionMatrix(phongShader);
-        setupViewMatrix(phongShader);
+        setupProjectionViewMatrix(phongShader);
         setupModelMatrix(phongShader);
         
         glActiveTexture(GL_TEXTURE0);	
@@ -280,38 +277,47 @@ void setupData() {
 
     diffuseTexture = loadTexture(diffuseTexturePath);
     specularTexture = loadTexture(specularTexturePath);
+    
+    glGenBuffers(1, &uboMatrices);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices); 
 }
 
 void setupPhongVariables(Shader shader){
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.position"), lightPosition.x, lightPosition.y, lightPosition.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "vLightPos"), lightPosition.x, lightPosition.y, lightPosition.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "vCameraPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 
     glUniform3f(glGetUniformLocation(shader.Program, "u_Light.ambientColor"), lightAmbientMaterial.x, lightAmbientMaterial.y, lightAmbientMaterial.z);
     glUniform3f(glGetUniformLocation(shader.Program, "u_Light.diffuseColor"), lightDiffuseMaterial.x, lightDiffuseMaterial.y, lightDiffuseMaterial.z);
     glUniform3f(glGetUniformLocation(shader.Program, "u_Light.specularColor"), lightSpecularMaterial.x, lightSpecularMaterial.y, lightSpecularMaterial.z);
     
-    glUniform3f(glGetUniformLocation(shader.Program, "u_CameraPos"), camera.Position.x, camera.Position.y, camera.Position.z);
-
     glUniform1f(glGetUniformLocation(shader.Program, "u_Material.shininess"), shininess);
     glUniform1i(glGetUniformLocation(shader.Program, "u_Material.diffuseTexture"), 0);
     glUniform1i(glGetUniformLocation(shader.Program, "u_Material.specularTexture"), 1);
 
 }
 
-void setupProjectionMatrix(Shader shader) {
-    glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
-    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "u_Projection"), 1, GL_FALSE, glm::value_ptr(projection));
-}
-
-void setupViewMatrix(Shader shader) {
-    glm::mat4 view = camera.GetViewMatrix();
-    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "u_View"), 1, GL_FALSE, glm::value_ptr(view));
+void setupProjectionViewMatrix(Shader shader) {
+    glUniformBlockBinding(shader.Program, glGetUniformBlockIndex(shader.Program, "Matrices"), 0);
+    
+    glm::mat4 projection = glm::perspective(45.0f, (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0); 
+    
+    glm::mat4 view = camera.GetViewMatrix();	       
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0); 
 }
 
 void setupModelMatrix(Shader shader, glm::vec3 scale, glm::vec3 translate){
     glm::mat4 model = glm::mat4();
     model = glm::translate(model, translate);
     model = glm::scale(model, scale);
-    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "u_Model"), 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "Model"), 1, GL_FALSE, glm::value_ptr(model));
 }
 
 // Is called whenever a key is pressed/released via GLFW
