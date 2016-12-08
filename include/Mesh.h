@@ -4,35 +4,38 @@
 #include <assimp/types.h>
 
 struct Vertex {
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec2 texCoords;
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texCoords;
 };
 
 struct Texture {
-	GLuint id;
-	enum Type { DIFFUSE, SPECULAR } type;
-	aiString path; // Store path of texture to avoid loading it more than once
+    GLuint id;
+
+    enum Type {
+        DIFFUSE, SPECULAR
+    } type;
+    aiString path; // Store path of texture to avoid loading it more than once
 };
 
 class Mesh {
 public:
-	/* Mesh Data */
-	std::vector<Vertex> vertices;
-	std::vector<GLuint> indices;
-	std::vector<Texture> textures;
+    /* Mesh Data */
+    std::vector<Vertex> vertices;
+    std::vector<GLuint> indices;
+    std::vector<Texture> textures;
 
 private:
-	/* Render Data */
-	GLuint 	m_VAO, 	// Stores data
-			m_VBO, 	// Data configuration (enable/disable attr)
-			m_EBO;	// Data indices (order)
+    /* Render Data */
+    GLuint m_VAO, // Stores data
+             m_VBO, // Data configuration (enable/disable attr)
+            m_EBO; // Data indices (order)
 
 public:
-	Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, std::vector<Texture> &textures);
-	void draw(Shader shader);
+    Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, std::vector<Texture> &textures);
+    void draw(Shader shader);
 private:
-	// Initialize buffers
-	void initialize();
+    // Initialize buffers
+    void initialize();
 
 };
