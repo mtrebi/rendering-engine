@@ -34,8 +34,9 @@ const vec3 diffuseComponent(){
 }
 
 const vec3 specularComponent(){
-    vec3 reflecteDir = reflect(fs_in.V ,fs_in.N);
-    return u_Light.specularColor * vec3(texture(u_Material.specularTexture, fs_in.TexCoords)) * pow(max(dot(fs_in.V, reflecteDir), 0), u_Material.shininess) ;
+    //vec3 reflecteDir = reflect(-fs_in.L, fs_in.V);
+    vec3 H = normalize(fs_in.L + fs_in.V);
+    return u_Light.specularColor * vec3(texture(u_Material.specularTexture, fs_in.TexCoords)) * pow(max(dot(fs_in.V, H), 0), u_Material.shininess) ;
 }
 
 const vec3 phongShading(){
