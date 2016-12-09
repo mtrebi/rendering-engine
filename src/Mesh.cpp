@@ -42,8 +42,6 @@ void Mesh::initialize() {
     glBindVertexArray(0);
 }
 
-//TODO: move this to a Shader class that gets a Mesh object!!!
-
 void Mesh::draw(Shader shader) {
     GLuint diffuseCount = 1;
     GLuint specularCount = 1;
@@ -57,15 +55,15 @@ void Mesh::draw(Shader shader) {
         std::string texture_suffix = "texture";
         switch (currentTexture.type) {
             case Texture::DIFFUSE:
-                texture_suffix = "_diffuse" + diffuseCount;
+                texture_suffix += "_diffuse" + std::to_string(diffuseCount);
                 ++diffuseCount;
                 break;
             case Texture::SPECULAR:
-                texture_suffix = "_specular" + specularCount;
+                texture_suffix += "_specular" + std::to_string(specularCount);
                 ++specularCount;
                 break;
         }
-
+        
         glUniform1i(glGetUniformLocation(shader.Program, ("material." + texture_suffix).c_str()), i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
