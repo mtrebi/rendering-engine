@@ -58,7 +58,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
     std::vector<Texture> textures;
-
+    Material mtl;
     // Process vertices
     for (GLuint i = 0; i < mesh->mNumVertices; ++i) {
         Vertex vertex;
@@ -93,7 +93,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     // Process textures
-    if (mesh->mMaterialIndex >= 0) { // Has material
+    if (mesh->mMaterialIndex >= 0) { 
+        // Has material
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
         std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, Texture::DIFFUSE);
@@ -101,9 +102,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
         std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, Texture::SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    
+        float shininess = 0.0f;
+        float transparency = 0.0f;
+        unsigned int max;
+        aiGetMaterialFloatArray(material, AI_MATKEY_SHININESS, &shininess, &max);
+        mtl = { shininess/4 }; 
     }
 
-    return Mesh(vertices, indices, textures);
+    return Mesh(vertices, indices, textures, mtl);
 
 }
 

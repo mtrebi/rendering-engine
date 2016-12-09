@@ -1,11 +1,11 @@
 #include "Mesh.h"
 #include <string>
 
-Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, std::vector<Texture> &textures) {
+Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, std::vector<Texture> &textures,  Material material) {
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
-
+    this->material = material;
     this->initialize();
 }
 
@@ -68,7 +68,8 @@ void Mesh::draw(Shader shader) {
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);
-
+    glUniform1f(glGetUniformLocation(shader.Program, "material.shininess"), material.shininess);
+    
     // Draw mesh
     glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

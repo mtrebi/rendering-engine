@@ -18,21 +18,25 @@ struct Texture {
     aiString path; // Store path of texture to avoid loading it more than once
 };
 
+struct Material {
+    float shininess;
+};
+
 class Mesh {
 public:
     /* Mesh Data */
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
     std::vector<Texture> textures;
-
+    Material material; // TODO add more materials
 private:
     /* Render Data */
     GLuint m_VAO, // Stores data
-             m_VBO, // Data configuration (enable/disable attr)
-            m_EBO; // Data indices (order)
+    m_VBO, // Data configuration (enable/disable attr)
+    m_EBO; // Data indices (order)
 
 public:
-    Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, std::vector<Texture> &textures);
+    Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, std::vector<Texture> &textures, Material material);
     void draw(Shader shader);
 private:
     // Initialize buffers

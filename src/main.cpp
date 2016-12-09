@@ -72,9 +72,6 @@ glm::vec3 lightAmbientMaterial = glm::vec3(0.2f);
 glm::vec3 lightDiffuseMaterial = glm::vec3(0.5f);
 glm::vec3 lightSpecularMaterial = glm::vec3(1.f);
 
-
-const GLfloat shininess = 10.0f;
-
 // The MAIN function, from here we start the application and run the game loop
 int main(){
 
@@ -113,7 +110,6 @@ int main(){
         setupProjectionViewMatrix(phongShader);
         setupModelMatrix(phongShader);
         cube.draw(phongShader);
-
         glfwSwapBuffers(window);
     }
     terminate();
@@ -210,11 +206,6 @@ void setupPhongVariables(Shader shader){
     glUniform3f(glGetUniformLocation(shader.Program, "u_Light.ambientColor"), lightAmbientMaterial.x, lightAmbientMaterial.y, lightAmbientMaterial.z);
     glUniform3f(glGetUniformLocation(shader.Program, "u_Light.diffuseColor"), lightDiffuseMaterial.x, lightDiffuseMaterial.y, lightDiffuseMaterial.z);
     glUniform3f(glGetUniformLocation(shader.Program, "u_Light.specularColor"), lightSpecularMaterial.x, lightSpecularMaterial.y, lightSpecularMaterial.z);
-    
-    glUniform1f(glGetUniformLocation(shader.Program, "u_Material.shininess"), shininess);
-    glUniform1i(glGetUniformLocation(shader.Program, "u_Material.diffuseTexture"), 0);
-    glUniform1i(glGetUniformLocation(shader.Program, "u_Material.specularTexture"), 1);
-
 }
 
 void setupProjectionViewMatrix(Shader shader) {
