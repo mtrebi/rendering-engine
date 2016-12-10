@@ -74,9 +74,17 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         vertex.normal.z = mesh->mNormals[i].z;
 
         // Textures
-        if (mesh->mTextureCoords) { // Has texture coords
-            vertex.texCoords.x = mesh->mTextureCoords[0][i].x;
-            vertex.texCoords.y = mesh->mTextureCoords[0][i].y;
+        if (mesh->mTextureCoords) {
+            // Has texture coords
+            aiVector3D * vector = mesh->mTextureCoords[0];
+            if (vector){
+                // Has components
+                vertex.texCoords.x = mesh->mTextureCoords[0][i].x;
+                vertex.texCoords.y = mesh->mTextureCoords[0][i].y;
+            }else {
+                vertex.texCoords.x = 0.0f;
+                vertex.texCoords.y = 0.0f;
+            }
         } else {
             vertex.texCoords = glm::vec2(0.0f, 0.0f);
         }
@@ -109,7 +117,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         aiGetMaterialFloatArray(material, AI_MATKEY_SHININESS, &shininess, &max);
         mtl = { shininess/4 }; 
     }
-
+    
     return Mesh(vertices, indices, textures, mtl);
 
 }
