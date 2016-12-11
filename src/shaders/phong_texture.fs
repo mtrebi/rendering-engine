@@ -23,6 +23,8 @@ struct DirectionalLight {
     vec3 Ka;
     vec3 Kd;
     vec3 Ks;
+
+    float Krim;
 };
 
 in VS_OUT {
@@ -78,11 +80,16 @@ const vec3 pointLightContribution(const PointLight pointLight){
     return result;
 }
 
+const vec3 rimContribution(){
+    return directionalLight.Ka * pow((1 - dot(fs_in.V, fs_in.N)), directionalLight.Krim);
+}
+
 void main(){
     const vec3 dirContr = directionalContribution();
-    vec3 pointContr = pointLightContribution(pointLight);
-    
-    const vec3 result = dirContr + pointContr;
+    const vec3 pointContr = pointLightContribution(pointLight);
+    const vec3 rimContr = rimContribution();
+    const vec3 result = dirContr + pointContr + rimContr;
     oColor = vec4(result, 1.0f);
+    //oColor = vec4(rimLighting(), 1.0f);
     //oColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }

@@ -58,7 +58,7 @@ GLchar* phongVSPath = "../src/shaders/phong_texture.vs";
 GLchar* phongFSPath = "../src/shaders/phong_texture.fs";
 
 GLchar* cubePath = "../assets/models/box/box.obj";
-GLchar* dragonPath = "../assets/models/dragon/dragon.obj";
+GLchar* dragonPath = "../assets/models/dragon_vn/dragon.obj";
 GLchar* nanosuitPath = "../assets/models/nanosuit/nanosuit.obj";
 
 GLuint VBO, lightVAO, cubeVAO, diffuseTexture, specularTexture, uboMatrices;
@@ -81,10 +81,12 @@ struct DirectionalLight {
     glm::vec3 Ka;
     glm::vec3 Kd;
     glm::vec3 Ks;
+    
+    float Krim;
 };
 
 PointLight pointLight = {glm::vec3(1.5f, 4.0f, 1.5f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f), 1.0f, 0.09f, 0.032f };
-DirectionalLight directionalLight = {glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f)};
+DirectionalLight directionalLight = {glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f), glm::vec3(0.5f), glm::vec3(0.5f), 2.0f};
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){
@@ -116,7 +118,7 @@ int main(){
         lightShader.Use();
         setupProjectionViewMatrix(lightShader);
         setupModelMatrix(lightShader, glm::vec3(0.2f), pointLight.position);
-        cube.draw(lightShader);
+        //cube.draw(lightShader);
                
         phongShader.Use();
         setupPhongVariables(phongShader);
@@ -219,7 +221,7 @@ void setupPhongVariables(Shader shader){
     glUniform3f(glGetUniformLocation(shader.Program, "directionalLight.Ka"),  directionalLight.Ka.x, directionalLight.Ka.y, directionalLight.Ka.z);
     glUniform3f(glGetUniformLocation(shader.Program, "directionalLight.Kd"),  directionalLight.Kd.x, directionalLight.Kd.y, directionalLight.Kd.z);
     glUniform3f(glGetUniformLocation(shader.Program, "directionalLight.Ks"),  directionalLight.Ks.x, directionalLight.Ks.y, directionalLight.Ks.z);
-
+    glUniform1f(glGetUniformLocation(shader.Program, "directionalLight.Krim"),  directionalLight.Krim);
       
     glUniform3f(glGetUniformLocation(shader.Program, "pointLight.position"), pointLight.position.x, pointLight.position.y, pointLight.position.z);
     glUniform3f(glGetUniformLocation(shader.Program, "pointLight.Ka"),  pointLight.Ka.x, pointLight.Ka.y, pointLight.Ka.z);
