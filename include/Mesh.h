@@ -19,7 +19,12 @@ struct Texture {
 };
 
 struct Material {
+    glm::vec3 Ka;
+    glm::vec3 Kd;
+    glm::vec3 Ks;
     float shininess;
+    float transparency;
+    float Ni;
 };
 
 class Mesh {
