@@ -83,7 +83,7 @@ struct DirectionalLight {
     glm::vec3 Ks;
 };
 
-PointLight pointLight = {glm::vec3(1.5f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f), 1.0f, 0.09f, 0.032f };
+PointLight pointLight = {glm::vec3(1.5f, 4.0f, 1.5f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f), 1.0f, 0.09f, 0.032f };
 DirectionalLight directionalLight = {glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f)};
 
 // The MAIN function, from here we start the application and run the game loop
@@ -111,7 +111,7 @@ int main(){
         calculateCameraMovement();
         clearBuffers();
              
-        moveLight();
+        //moveLight();
         
         lightShader.Use();
         setupProjectionViewMatrix(lightShader);
@@ -121,10 +121,10 @@ int main(){
         phongShader.Use();
         setupPhongVariables(phongShader);
         setupProjectionViewMatrix(phongShader);
-        setupModelMatrix(phongShader);
-        cube.draw(phongShader);
+        setupModelMatrix(phongShader, glm::vec3(0.3f));
+        //cube.draw(phongShader);
         //dragon.draw(phongShader);
-        //nanosuit.draw(phongShader);
+        nanosuit.draw(phongShader);
         glfwSwapBuffers(window);
     }
     terminate();
