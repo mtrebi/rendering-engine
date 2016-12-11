@@ -129,10 +129,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         unsigned int max;
         aiGetMaterialFloatArray(material, AI_MATKEY_SHININESS, &shininess, &max);
         mtl.shininess = shininess/4 ; 
-        
+
         float transparency = 0.0f;
         aiGetMaterialFloatArray(material, AI_MATKEY_COLOR_TRANSPARENT, &transparency, &max);
-        mtl.shininess = transparency; 
+        mtl.transparency = transparency; 
 
     }
     
