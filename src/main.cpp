@@ -69,6 +69,10 @@ struct PointLight {
     glm::vec3 Ka;
     glm::vec3 Kd;
     glm::vec3 Ks;
+    
+    GLfloat Kc;
+    GLfloat Kl;
+    GLfloat Kq;
 };
 
 struct DirectionalLight {
@@ -79,7 +83,7 @@ struct DirectionalLight {
     glm::vec3 Ks;
 };
 
-PointLight pointLight = {glm::vec3(1.5f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f)};
+PointLight pointLight = {glm::vec3(1.5f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f), 1.0f, 0.09f, 0.032f };
 DirectionalLight directionalLight = {glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f)};
 
 // The MAIN function, from here we start the application and run the game loop
@@ -222,6 +226,11 @@ void setupPhongVariables(Shader shader){
     glUniform3f(glGetUniformLocation(shader.Program, "pointLight.Kd"),  pointLight.Kd.x, pointLight.Kd.y, pointLight.Kd.z);
     glUniform3f(glGetUniformLocation(shader.Program, "pointLight.Ks"),  pointLight.Ks.x, pointLight.Ks.y, pointLight.Ks.z);
 
+    glUniform1f(glGetUniformLocation(shader.Program, "pointLight.Kc"),  pointLight.Kc);
+    glUniform1f(glGetUniformLocation(shader.Program, "pointLight.Kl"),  pointLight.Kl);
+    glUniform1f(glGetUniformLocation(shader.Program, "pointLight.Kq"),  pointLight.Kq);
+
+    
    glUniform3f(glGetUniformLocation(shader.Program, "vCameraPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 
 

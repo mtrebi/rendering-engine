@@ -15,13 +15,17 @@ struct PointLight {
     vec3 Ka;
     vec3 Kd;
     vec3 Ks;
+
+    float Kc;
+    float Kl;
+    float Kq;
 };
 
 uniform PointLight pointLight;
 uniform vec3 vCameraPos;
 
 out VS_OUT {
-    vec3 L;
+    vec3 FragPosition;
     vec3 V;
     vec3 N;
     vec2 TexCoords;
@@ -29,8 +33,8 @@ out VS_OUT {
 
 void main() {
     vec3 FragPos = vec3(Model * vec4(l_Position, 1.0f));
+    vs_out.FragPosition = FragPos;
     vs_out.V = normalize(vCameraPos - FragPos);
-    vs_out.L = normalize(pointLight.position - FragPos);
     vs_out.N = normalize(mat3(transpose(inverse(Model))) * l_Normal);
     vs_out.TexCoords = l_TexCoords;
     

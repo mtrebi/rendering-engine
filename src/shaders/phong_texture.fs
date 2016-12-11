@@ -12,6 +12,10 @@ struct PointLight {
     vec3 Ka;
     vec3 Kd;
     vec3 Ks;
+
+    float Kc;
+    float Kl;
+    float Kq;
 };
 
 struct DirectionalLight {  
@@ -22,7 +26,7 @@ struct DirectionalLight {
 };
 
 in VS_OUT {
-    vec3 L;
+    vec3 FragPosition;
     vec3 V;
     vec3 N;
     vec2 TexCoords;
@@ -60,9 +64,25 @@ const vec3 directionalContribution(){
     return phongShading(directionalLight.Ka, directionalLight.Kd, directionalLight.Ks, normalize(-directionalLight.direction));
 }
 
+const float lightAttenuation(const float Kc, const float Kl, const float Kq, const float distance){
+    return 1 / (Kc + Kl * distance + Kq * pow(distance, 2));
+}
+
+const vec3 pointLightContribution(const PointLight pointLight){
+    const vec3 lightDirection = normalize(pointLight.position - fs_in.FragPosition);
+    const vec3 phong = phongShading(pointLight.Ka, pointLight.Kd, pointLight.Ks, lightDirection);
+    const float distance = length(pointLight.position - fs_in.FragPosition);
+    const float attenuation = lightAttenuation(pointLight.Kc, pointLight.Kl, pointLight.Kq, distance);
+    const vec3 result = phong * attenuation;
+
+    return result;
+}
 
 void main(){
     const vec3 dirContr = directionalContribution();
-    oColor = vec4(dirContr, 1.0f);
+    vec3 pointContr = pointLightContribution(pointLight);
+    
+    const vec3 result = dirContr + pointContr;
+    oColor = vec4(result, 1.0f);
     //oColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }
