@@ -58,6 +58,9 @@ GLchar* phongVSPath = "../src/shaders/phong_texture.vs";
 GLchar* phongFSPath = "../src/shaders/phong_texture.fs";
 
 GLchar* cubePath = "../assets/models/box/box.obj";
+GLchar* dragonPath = "../assets/models/dragon/dragon.obj";
+
+
 
 GLuint VBO, lightVAO, cubeVAO, diffuseTexture, specularTexture, uboMatrices;
 
@@ -85,7 +88,7 @@ int main(){
     Shader phongShader = Shader(phongVSPath, phongFSPath);
     
     Model cube = Model(cubePath);
-    
+    Model dragon = Model(dragonPath);
     // Game loop
     while(!glfwWindowShouldClose(window))
     {
@@ -109,7 +112,8 @@ int main(){
         setupPhongVariables(phongShader);
         setupProjectionViewMatrix(phongShader);
         setupModelMatrix(phongShader);
-        cube.draw(phongShader);
+        //cube.draw(phongShader);
+        dragon.draw(phongShader);
         glfwSwapBuffers(window);
     }
     terminate();
