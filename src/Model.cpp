@@ -122,7 +122,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         mtl.Kd = glm::vec3(Kd.r, Kd.g, Kd.b);
         
         aiColor4D Ks;
-        aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &Ks);
+        aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &Ks);
         mtl.Ks = glm::vec3(Ks.r, Ks.g, Ks.b);
         
         float shininess = 0.0f;
