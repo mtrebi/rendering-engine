@@ -7,10 +7,11 @@ struct Material {
     float shininess;
 };
 
-struct Light {    
-    vec3 ambientColor;
-    vec3 diffuseColor;
-    vec3 specularColor;
+struct PointLight {  
+    vec3 position;
+    vec3 Ka;
+    vec3 Kd;
+    vec3 Ks;
 };
 
 in VS_OUT {
@@ -21,22 +22,22 @@ in VS_OUT {
 } fs_in;
 
 uniform Material material;
-uniform Light u_Light;
+uniform PointLight pointLight;
 
 out vec4 oColor;
 
 const vec3 ambientComponent(){
-    return u_Light.ambientColor * vec3(texture(material.texture_diffuse1, fs_in.TexCoords));
+    return pointLight.Ka * vec3(texture(material.texture_diffuse1, fs_in.TexCoords));
 }
 
 const vec3 diffuseComponent(){
-    return u_Light.diffuseColor * vec3(texture(material.texture_diffuse1, fs_in.TexCoords)) * max(dot(fs_in.L, fs_in.N),0);
+    return pointLight.Kd * vec3(texture(material.texture_diffuse1, fs_in.TexCoords)) * max(dot(fs_in.L, fs_in.N),0);
 }
 
 const vec3 specularComponent(){
     //vec3 reflecteDir = reflect(-fs_in.L, fs_in.V);
     vec3 H = normalize(fs_in.L + fs_in.V);
-    return u_Light.specularColor * vec3(texture(material.texture_specular1, fs_in.TexCoords)) * pow(max(dot(fs_in.V, H), 0), material.shininess) ;
+    return pointLight.Ks * vec3(texture(material.texture_specular1, fs_in.TexCoords)) * pow(max(dot(fs_in.N, H), 0), material.shininess) ;
 }
 
 const vec3 phongShading(){
@@ -49,4 +50,5 @@ const vec3 phongShading(){
 
 void main(){
     oColor = vec4(phongShading(), 1.0f);
+    //oColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }

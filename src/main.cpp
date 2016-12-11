@@ -63,16 +63,15 @@ GLchar* nanosuitPath = "../assets/models/nanosuit/nanosuit.obj";
 
 GLuint VBO, lightVAO, cubeVAO, diffuseTexture, specularTexture, uboMatrices;
 
-glm::vec3 lightPosition = glm::vec3(1.2f, 5.0f, 1.0f);
-glm::vec3 lightColor = glm::vec3(1.0f);
+struct PointLight {
+    glm::vec3 position;
+    
+    glm::vec3 Ka;
+    glm::vec3 Kd;
+    glm::vec3 Ks;
+};
 
-glm::vec3 ambientMaterial = glm::vec3(0.0215f, 0.1745f, 0.0215);
-glm::vec3 diffuseMaterial = glm::vec3(0.07568, 0.61424f,0.07568);
-glm::vec3 specularMaterial = glm::vec3(0.633f, 0.727811f, 0.633f);
-
-glm::vec3 lightAmbientMaterial = glm::vec3(0.2f);
-glm::vec3 lightDiffuseMaterial = glm::vec3(0.5f);
-glm::vec3 lightSpecularMaterial = glm::vec3(1.f);
+PointLight pointLight = {glm::vec3(1.5f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f)};
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){
@@ -103,16 +102,16 @@ int main(){
         
         lightShader.Use();
         setupProjectionViewMatrix(lightShader);
-        setupModelMatrix(lightShader, glm::vec3(0.2f), lightPosition);
+        setupModelMatrix(lightShader, glm::vec3(0.2f), pointLight.position);
         cube.draw(lightShader);
                
         phongShader.Use();
         setupPhongVariables(phongShader);
         setupProjectionViewMatrix(phongShader);
-        setupModelMatrix(phongShader, glm::vec3(0.2f));
-        //cube.draw(phongShader);
+        setupModelMatrix(phongShader);
+        cube.draw(phongShader);
         //dragon.draw(phongShader);
-        nanosuit.draw(phongShader);
+        //nanosuit.draw(phongShader);
         glfwSwapBuffers(window);
     }
     terminate();
@@ -177,8 +176,8 @@ void calculateFrameTime(){
 
 void moveLight(){
     GLfloat currentFrame = glfwGetTime();
-    lightPosition.x = 1.0f + (sin(glfwGetTime())) * 2.0f;
-    lightPosition.y = 1.0f + (cos(glfwGetTime())) * 2.0f;
+    pointLight.position.x = 1.0f + (sin(glfwGetTime())) * 2.0f;
+    pointLight.position.y = 1.0f + (cos(glfwGetTime())) * 2.0f;
 
 }
 
@@ -203,12 +202,14 @@ void setupData() {
 }
 
 void setupPhongVariables(Shader shader){
-    glUniform3f(glGetUniformLocation(shader.Program, "vLightPos"), lightPosition.x, lightPosition.y, lightPosition.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "vCameraPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "pointLight.position"), pointLight.position.x, pointLight.position.y, pointLight.position.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "pointLight.Ka"),  pointLight.Ka.x, pointLight.Ka.y, pointLight.Ka.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "pointLight.Kd"),  pointLight.Kd.x, pointLight.Kd.y, pointLight.Kd.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "pointLight.Ks"),  pointLight.Ks.x, pointLight.Ks.y, pointLight.Ks.z);
 
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.ambientColor"), lightAmbientMaterial.x, lightAmbientMaterial.y, lightAmbientMaterial.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.diffuseColor"), lightDiffuseMaterial.x, lightDiffuseMaterial.y, lightDiffuseMaterial.z);
-    glUniform3f(glGetUniformLocation(shader.Program, "u_Light.specularColor"), lightSpecularMaterial.x, lightSpecularMaterial.y, lightSpecularMaterial.z);
+   glUniform3f(glGetUniformLocation(shader.Program, "vCameraPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+
+
 }
 
 void setupProjectionViewMatrix(Shader shader) {

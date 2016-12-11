@@ -10,7 +10,14 @@ layout (std140, binding = 0) uniform Matrices {
 
 uniform mat4 Model;
 
-uniform vec3 vLightPos;
+struct PointLight {  
+    vec3 position;
+    vec3 Ka;
+    vec3 Kd;
+    vec3 Ks;
+};
+
+uniform PointLight pointLight;
 uniform vec3 vCameraPos;
 
 out VS_OUT {
@@ -23,7 +30,7 @@ out VS_OUT {
 void main() {
     vec3 FragPos = vec3(Model * vec4(l_Position, 1.0f));
     vs_out.V = normalize(vCameraPos - FragPos);
-    vs_out.L = normalize(vLightPos - FragPos);
+    vs_out.L = normalize(pointLight.position - FragPos);
     vs_out.N = normalize(mat3(transpose(inverse(Model))) * l_Normal);
     vs_out.TexCoords = l_TexCoords;
     
