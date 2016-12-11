@@ -71,7 +71,16 @@ struct PointLight {
     glm::vec3 Ks;
 };
 
+struct DirectionalLight {
+    glm::vec3 direction;
+    
+    glm::vec3 Ka;
+    glm::vec3 Kd;
+    glm::vec3 Ks;
+};
+
 PointLight pointLight = {glm::vec3(1.5f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f)};
+DirectionalLight directionalLight = {glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f)};
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){
@@ -202,6 +211,12 @@ void setupData() {
 }
 
 void setupPhongVariables(Shader shader){
+    glUniform3f(glGetUniformLocation(shader.Program, "directionalLight.direction"), directionalLight.direction.x, directionalLight.direction.y, directionalLight.direction.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "directionalLight.Ka"),  directionalLight.Ka.x, directionalLight.Ka.y, directionalLight.Ka.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "directionalLight.Kd"),  directionalLight.Kd.x, directionalLight.Kd.y, directionalLight.Kd.z);
+    glUniform3f(glGetUniformLocation(shader.Program, "directionalLight.Ks"),  directionalLight.Ks.x, directionalLight.Ks.y, directionalLight.Ks.z);
+
+      
     glUniform3f(glGetUniformLocation(shader.Program, "pointLight.position"), pointLight.position.x, pointLight.position.y, pointLight.position.z);
     glUniform3f(glGetUniformLocation(shader.Program, "pointLight.Ka"),  pointLight.Ka.x, pointLight.Ka.y, pointLight.Ka.z);
     glUniform3f(glGetUniformLocation(shader.Program, "pointLight.Kd"),  pointLight.Kd.x, pointLight.Kd.y, pointLight.Kd.z);
