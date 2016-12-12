@@ -1,11 +1,12 @@
 #include "Model.h"
 // Std. Includes
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <map>
 #include <vector>
+#include <stdlib.h>     /* exit, EXIT_FAILURE */
+
 using namespace std;
 // GL Includes
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
@@ -15,8 +16,6 @@ using namespace std;
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-GLint TextureFromFile(const char* path, string directory);
 
 Model::Model(GLchar* path) {
     loadModel(path);
@@ -158,7 +157,17 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* material, aiTexture
 
         if (!skip) {
             Texture texture;
-            texture.id = TextureFromFile(str.C_Str(), m_directory);
+            switch(textureType){
+                case Texture::Type::DIFFUSE:
+                    texture.id = TextureFromFile(str.C_Str(), m_directory, GL_RGB);
+                    break;
+                case Texture::Type::SPECULAR:
+                    texture.id = TextureFromFile(str.C_Str(), m_directory, GL_SRGB);
+                    break;
+                default:
+                    std::cout << "Texture type not specified" << std::endl;
+                    exit(EXIT_FAILURE);
+            }
             texture.type = textureType;
             texture.path = str;
             textures.push_back(texture);
@@ -168,7 +177,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* material, aiTexture
     return textures;
 }
 
-GLint TextureFromFile(const char* path, string directory) {
+GLint Model::TextureFromFile(const char* path, string directory, GLint level) {
     //Generate texture ID and load texture data 
     string filename = string(path);
     filename = directory + '/' + filename;
@@ -178,7 +187,7 @@ GLint TextureFromFile(const char* path, string directory) {
     unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
     // Assign texture to ID
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, level, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     // Parameters
