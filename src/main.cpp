@@ -60,6 +60,7 @@ GLchar* phongFSPath = "../src/shaders/phong_texture.fs";
 GLchar* cubePath = "../assets/models/box/box.obj";
 GLchar* dragonPath = "../assets/models/dragon_vn/dragon.obj";
 GLchar* nanosuitPath = "../assets/models/nanosuit/nanosuit.obj";
+GLchar* planePath = "../assets/models/plane/plane.obj";
 
 GLuint VBO, lightVAO, cubeVAO, diffuseTexture, specularTexture, uboMatrices;
 
@@ -103,7 +104,7 @@ int main(){
     Model cube = Model(cubePath);
     Model dragon = Model(dragonPath);
     Model nanosuit = Model(nanosuitPath);
-
+    Model plane = Model(planePath);
     // Game loop
     while(!glfwWindowShouldClose(window))
     {
@@ -123,10 +124,13 @@ int main(){
         phongShader.Use();
         setupPhongVariables(phongShader);
         setupProjectionViewMatrix(phongShader);
-        setupModelMatrix(phongShader, glm::vec3(0.3f));
+        setupModelMatrix(phongShader, glm::vec3(0.1f));
         //cube.draw(phongShader);
         //dragon.draw(phongShader);
         nanosuit.draw(phongShader);
+        setupModelMatrix(phongShader, glm::vec3(1.0f));
+
+        plane.draw(phongShader);
         glfwSwapBuffers(window);
     }
     terminate();
