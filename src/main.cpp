@@ -86,7 +86,7 @@ struct DirectionalLight {
 };
 
 PointLight pointLight = {glm::vec3(1.5f, 4.0f, 1.5f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f), 1.0f, 0.09f, 0.032f };
-DirectionalLight directionalLight = {glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f), glm::vec3(0.5f), glm::vec3(0.5f), 2.0f};
+DirectionalLight directionalLight = {glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.2f), glm::vec3(0.5f), glm::vec3(0.5f), 2.0f};
 
 // The MAIN function, from here we start the application and run the game loop
 int main(){

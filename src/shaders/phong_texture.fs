@@ -37,7 +37,7 @@ in VS_OUT {
 uniform Material material;
 uniform PointLight pointLight;
 uniform DirectionalLight directionalLight;
-
+uniform vec3 rimColor;
 out vec4 oColor;
 
 const vec3 ambientComponent(const vec3 Ka){
@@ -87,12 +87,16 @@ const vec3 rimContribution(){
     return directionalLight.Ka * pow(f, directionalLight.Krim);
 }
 
+const vec3 gammaCorrect(const vec3 originalColor, const float gamma = 2.2){
+    const vec3 correctedColor = pow(originalColor, vec3(1.0f/gamma));
+    return correctedColor;
+}
+
 void main(){
     const vec3 dirContr = directionalContribution();
     const vec3 pointContr = pointLightContribution(pointLight);
     const vec3 rimContr = rimContribution();
-    const vec3 result = dirContr + pointContr + rimContr;
-    oColor = vec4(result, 1.0f);
-    //oColor = vec4(rimLighting(), 1.0f);
-    //oColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    const vec3 blinnPhong = dirContr + pointContr;
+
+    oColor = vec4(gammaCorrect(blinnPhong) + rimContr, 1.0f);
 }
