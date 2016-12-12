@@ -81,7 +81,7 @@ const vec3 pointLightContribution(const PointLight pointLight){
 }
 
 const vec3 rimContribution(){
-    float f = (1 - dot(fs_in.V, fs_in.N));
+    float f = (1 - dot(normalize(fs_in.V), normalize(fs_in.N)));
     f = smoothstep(0.0, 1.0, f);
 
     return directionalLight.Ka * pow(f, directionalLight.Krim);
