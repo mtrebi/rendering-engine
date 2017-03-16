@@ -4,6 +4,11 @@
 Debug/
 # Netbeans
 nbproject/
+*.user
+*.filters
+*.vcxproj
+*.sln
+
 # Cmake
 build
 CMakeCache.txt
