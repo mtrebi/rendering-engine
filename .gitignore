@@ -2,6 +2,7 @@
 #VS
 .vs/
 Debug/
+Release/
 # Netbeans
 nbproject/
 *.user
