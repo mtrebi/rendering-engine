@@ -1,8 +1,11 @@
 # Build
+#VS
+.vs/
+Debug/
+# Netbeans
 nbproject/
-build
-main
 # Cmake
+build
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
