@@ -1,1 +1,0 @@
-/usr/bin/cc  -fPIC -O3 -DNDEBUG  -shared -Wl,-soname,libGLEW.so -o lib/libGLEW.so CMakeFiles/glew.dir/home/maru/Documents/RC/code/OpenGL/rendering-engine/lib/glew-2.0.0/src/glew.c.o -lGLU -lGL 

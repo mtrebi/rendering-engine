@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/monitors.dir/monitors.c.o CMakeFiles/monitors.dir/__/deps/getopt.c.o CMakeFiles/monitors.dir/__/deps/glad.c.o  -o monitors -rdynamic ../src/libglfw.so.3.2 -lm -Wl,-rpath,/home/maru/Documents/RC/code/OpenGL/engine/lib/glfw-3.2.1/src 

@@ -1,1 +1,0 @@
-/usr/bin/cc  -O3 -DNDEBUG   CMakeFiles/glewinfo.dir/home/maru/Documents/RC/code/OpenGL/rendering-engine/lib/glew-2.0.0/src/glewinfo.c.o  -o bin/glewinfo -rdynamic lib/libGLEW.so -lSM -lICE -lX11 -lXext -lGLU -lGL -Wl,-rpath,/home/maru/Documents/RC/code/OpenGL/rendering-engine/lib/glew-2.0.0/build/lib: 

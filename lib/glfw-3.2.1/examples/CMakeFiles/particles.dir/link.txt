@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/particles.dir/particles.c.o CMakeFiles/particles.dir/__/deps/tinycthread.c.o CMakeFiles/particles.dir/__/deps/getopt.c.o CMakeFiles/particles.dir/__/deps/glad.c.o  -o particles -rdynamic ../src/libglfw.so.3.2 -lm -lpthread -lrt -Wl,-rpath,/home/maru/Documents/RC/code/OpenGL/engine/lib/glfw-3.2.1/src 

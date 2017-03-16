@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/gamma.dir/gamma.c.o CMakeFiles/gamma.dir/__/deps/getopt.c.o CMakeFiles/gamma.dir/__/deps/glad.c.o  -o gamma -rdynamic ../src/libglfw.so.3.2 -lm -Wl,-rpath,/home/maru/Documents/RC/code/OpenGL/engine/lib/glfw-3.2.1/src 

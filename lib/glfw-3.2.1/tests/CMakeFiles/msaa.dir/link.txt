@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/msaa.dir/msaa.c.o CMakeFiles/msaa.dir/__/deps/getopt.c.o CMakeFiles/msaa.dir/__/deps/glad.c.o  -o msaa -rdynamic ../src/libglfw.so.3.2 -lm -Wl,-rpath,/home/maru/Documents/RC/code/OpenGL/engine/lib/glfw-3.2.1/src 
