@@ -51,16 +51,16 @@ GLfloat deltaTime = 0.0f,   // Time between current frame and last frame
         lastFrame = 0.0f;   // Time of last frame
 bool firstMouse = false;
 
-GLchar* lightVSPath = "../src/shaders/light_shader.vs";
-GLchar* lightFSPath = "../src/shaders/light_shader.fs";
+GLchar* lightVSPath = "src/shaders/light_shader.vs";
+GLchar* lightFSPath = "src/shaders/light_shader.fs";
 
-GLchar* phongVSPath = "../src/shaders/phong_texture.vs";
-GLchar* phongFSPath = "../src/shaders/phong_texture.fs";
+GLchar* phongVSPath = "src/shaders/phong_texture.vs";
+GLchar* phongFSPath = "src/shaders/phong_texture.fs";
 
-GLchar* cubePath = "../assets/models/box/box.obj";
-GLchar* dragonPath = "../assets/models/dragon_vn/dragon.obj";
-GLchar* nanosuitPath = "../assets/models/nanosuit/nanosuit.obj";
-GLchar* planePath = "../assets/models/plane/plane.obj";
+GLchar* cubePath = "assets/models/box/box.obj";
+GLchar* dragonPath = "assets/models/dragon_vn/dragon.obj";
+GLchar* nanosuitPath = "assets/models/nanosuit/nanosuit.obj";
+GLchar* planePath = "assets/models/plane/plane.obj";
 
 GLuint VBO, lightVAO, cubeVAO, diffuseTexture, specularTexture, uboMatrices;
 
@@ -133,6 +133,9 @@ int main(){
         plane.draw(phongShader);
         glfwSwapBuffers(window);
     }
+
+
+
     terminate();
     return 0;
 }
