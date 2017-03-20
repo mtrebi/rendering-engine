@@ -18,6 +18,9 @@
 // Other includes
 #include "shaders/Shader.h"
 
+const GLchar* vs_path = "src/shaders/default.vs";
+const GLchar* fs_path = "src/shaders/default.fs";
+
 
 // Forward declarations
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -54,6 +57,44 @@ int main(){
     return -1;
   }
 
+  // Setup Vertex Data
+  GLfloat vertices[] = {
+    0.5f,  0.5f, 0.0f,  // Top Right
+    0.5f, -0.5f, 0.0f,  // Bottom Right
+    -0.5f, -0.5f, 0.0f,  // Bottom Left
+    -0.5f,  0.5f, 0.0f   // Top Left 
+  };
+  GLuint indices[] = {  // Note that we start from 0!
+    0, 1, 3,   // First Triangle
+    1, 2, 3    // Second Triangle
+  };
+
+  // Setup Vertex Buffer Object
+  GLuint VBO, VAO, EBO;
+  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
+
+  glGenVertexArrays(1, &VAO);
+  glBindVertexArray(VAO);
+
+  // 0. Copy our vertices array in a buffer for OpenGL to use
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  // 1. Then set the vertex attributes pointers
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+  glEnableVertexAttribArray(0);
+
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  // 2. Setup Shaders
+  Shader shader(vs_path, fs_path);
+  shader.Use();
 
   // Setup OpenGL viewport with Window sizes
   int width, height;
@@ -67,8 +108,13 @@ int main(){
     glfwPollEvents();
 
     // Rendering commands go here...
-    glClearColor(1.0f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
 
     // Swap color buffers (uses double buffering -> front and back)
     glfwSwapBuffers(window);
