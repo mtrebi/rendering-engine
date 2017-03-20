@@ -59,10 +59,16 @@ int main(){
 
   // Setup Vertex Data
   GLfloat vertices[] = {
-    // Positions         // Colors
-    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // Bottom Right
-    -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // Bottom Left
-    0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // Top 
+    // Positions          // Colors           // Texture Coords
+    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // Top Right
+    0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // Bottom Right
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // Bottom Left
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // Top Left 
+  };
+
+  GLint indices[] = {
+    0, 1, 2,
+    2, 3, 0
   };
 
   // Setup Vertex Buffer Object
@@ -74,28 +80,58 @@ int main(){
   glBindVertexArray(VAO);
 
   // 0. Copy our vertices array in a buffer for OpenGL to use
-  //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-  //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   // 1. Then set the vertex attributes pointers
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat)));
   glEnableVertexAttribArray(1);
-  
 
-
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+  glEnableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
+  int texture_width1, texture_height1;
+  int texture_width2, texture_height2;
+
+
+  GLuint texture1, texture2;
+  glGenTextures(1, &texture1);
+  glBindTexture(GL_TEXTURE_2D, texture1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  unsigned char* image1 = SOIL_load_image("assets/textures/container.jpg", &texture_width1, &texture_height1, 0, SOIL_LOAD_RGB);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_width1, texture_height1, 0, GL_RGB, GL_UNSIGNED_BYTE, image1);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  SOIL_free_image_data(image1);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glGenTextures(1, &texture2);
+  glBindTexture(GL_TEXTURE_2D, texture2);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  unsigned char* image2 = SOIL_load_image("assets/textures/awesomeface.png", &texture_width2, &texture_height2, 0, SOIL_LOAD_RGB);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_width2, texture_height2, 0, GL_RGB, GL_UNSIGNED_BYTE, image2);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  SOIL_free_image_data(image2);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+
   // 2. Setup Shaders
   Shader shader(vs_path, fs_path);
-  shader.Use();
+
 
   // Setup OpenGL viewport with Window sizes
   int width, height;
@@ -112,9 +148,18 @@ int main(){
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    shader.Use();
+    // Bind Textures using texture units
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    glUniform1i(glGetUniformLocation(shader.Program, "ourTexture1"), 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    glUniform1i(glGetUniformLocation(shader.Program, "ourTexture2"), 1);
+
+    //glDrawArrays(GL_TRIANGLES, 0, 4);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
 
@@ -123,6 +168,10 @@ int main(){
   }
 
   // Delete all resources
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteBuffers(1, &EBO);
+
   glfwTerminate();
   return 0;
 }
