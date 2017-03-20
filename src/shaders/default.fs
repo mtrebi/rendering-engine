@@ -1,6 +1,5 @@
 #version 330 core
 
-in vec3 vs_color;
 in vec2 vs_texture_coords;
 
 out vec4 fs_color;
