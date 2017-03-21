@@ -108,14 +108,36 @@ int main() {
     ////////////////////////
     glUniform3f(glGetUniformLocation(default_shader.Program, "camera_position"), camera.Position.x, camera.Position.y, camera.Position.z);
     
-    glUniform3f(glGetUniformLocation(default_shader.Program, "light.position"), light_position.x, light_position.y, light_position.z);
-    glUniform3f(glGetUniformLocation(default_shader.Program, "light.ambient"), 0.2f, 0.2f, 0.2f);
-    glUniform3f(glGetUniformLocation(default_shader.Program, "light.diffuse"), 0.4f, 0.4f, 0.4f);
-    glUniform3f(glGetUniformLocation(default_shader.Program, "light.specular"), 0.4f, 0.4f, 0.4f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "spot_light.position"), camera.Position.x, camera.Position.y, camera.Position.z);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "spot_light.direction"), camera.Front.x, camera.Front.y, camera.Front.z);
+
+    glUniform3f(glGetUniformLocation(default_shader.Program, "spot_light.ambient"), 0.2f, 0.2f, 0.2f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "spot_light.diffuse"), 0.4f, 0.4f, 0.4f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "spot_light.specular"), 0.4f, 0.4f, 0.4f);
+    glUniform1f(glGetUniformLocation(default_shader.Program, "spot_light.cutOff"), glm::cos(glm::radians(12.5f)));
+    glUniform1f(glGetUniformLocation(default_shader.Program, "spot_light.outerCutOff"), glm::cos(glm::radians(17.5f)));
+
+    /*
+    glUniform3f(glGetUniformLocation(default_shader.Program, "point_light.position"), light_position.x, light_position.y, light_position.z);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "point_light.ambient"), 0.2f, 0.2f, 0.2f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "point_light.diffuse"), 0.4f, 0.4f, 0.4f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "point_light.specular"), 0.4f, 0.4f, 0.4f);
+    glUniform1f(glGetUniformLocation(default_shader.Program, "point_light.constant"), 1.0f);
+    glUniform1f(glGetUniformLocation(default_shader.Program, "point_light.linear"), 0.09f);
+    glUniform1f(glGetUniformLocation(default_shader.Program, "point_light.quadratic"), 0.032f);
+    */
+    glUniform1i(glGetUniformLocation(default_shader.Program, "material.diffuse"), 0);
+    glUniform1i(glGetUniformLocation(default_shader.Program, "material.specular"), 1);
+    
+    /*
+    glUniform3f(glGetUniformLocation(default_shader.Program, "directional_light.direction"), -0.2f, -1.0f, -0.3f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "directional_light.ambient"), 0.2f, 0.2f, 0.2f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "directional_light.diffuse"), 0.4f, 0.4f, 0.4f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "directional_light.specular"), 0.4f, 0.4f, 0.4f);
 
     glUniform1i(glGetUniformLocation(default_shader.Program, "material.diffuse"), 0);
     glUniform1i(glGetUniformLocation(default_shader.Program, "material.specular"), 1);
-
+    */
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMap);
 
