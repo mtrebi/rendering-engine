@@ -103,10 +103,18 @@ int main() {
     default_shader.Use();
 
     ////////////////////////
-    glUniform3f(glGetUniformLocation(default_shader.Program, "object_color"), 1.0f, 0.0f, 0.0f);
-    glUniform3f(glGetUniformLocation(default_shader.Program, "light_color"), 1.0f, 1.0f, 1.0f);
-    glUniform3f(glGetUniformLocation(default_shader.Program, "light_position"), light_position.x, light_position.y, light_position.z);
     glUniform3f(glGetUniformLocation(default_shader.Program, "camera_position"), camera.Position.x, camera.Position.y, camera.Position.z);
+    
+    glUniform3f(glGetUniformLocation(default_shader.Program, "light.position"), light_position.x, light_position.y, light_position.z);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "light.ambient"), 0.2f, 0.2f, 0.2f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "light.diffuse"), 0.4f, 0.4f, 0.4f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "light.specular"), 0.4f, 0.4f, 0.4f);
+
+
+    glUniform3f(glGetUniformLocation(default_shader.Program, "material.ambient"), 1.0f, 0.5f, 0.31f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "material.diffuse"), 1.0f, 0.5f, 0.31f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "material.specular"), 0.5f, 0.5f, 0.5f);
+    glUniform1f(glGetUniformLocation(default_shader.Program, "material.shininess"), 32.0f);
 
     ////////////////////////
 
