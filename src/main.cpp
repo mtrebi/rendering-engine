@@ -48,8 +48,8 @@ GLfloat deltaTime = 0.0f,   // Time between current frame and last frame
 lastFrame = 0.0f;   // Time of last frame
 bool firstMouse = false;
 
-const GLchar* VS_PATH = "shaders/default.vs";
-const GLchar* FS_PATH = "shaders/default.fs";
+const GLchar* VS_PATH = "src/shaders/default.vs";
+const GLchar* FS_PATH = "src/shaders/default.fs";
 
 const GLchar* LIGHT_VS_PATH = "src/shaders/light_shader.vs";
 const GLchar* LIGHT_FS_PATH = "src/shaders/light_shader.fs";
@@ -57,7 +57,7 @@ const GLchar* LIGHT_FS_PATH = "src/shaders/light_shader.fs";
 
 GLchar* CUBE_PATH = "assets/models/box/box.obj";
 
-GLuint light_VAO;
+GLuint light_VAO, cube_VAO;
 
 glm::vec3 light_position = glm::vec3(1.2f, 1.0f, 2.0f);
 
@@ -72,7 +72,7 @@ int main() {
 
   setupData();
 
-  //Shader default_shader = Shader(VS_PATH, FS_PATH);
+  Shader default_shader = Shader(VS_PATH, FS_PATH);
   Shader light_shader = Shader(LIGHT_VS_PATH, LIGHT_FS_PATH);
 
   // Game loop
@@ -90,6 +90,20 @@ int main() {
     setupModelMatrix(light_shader, glm::vec3(0.2f), light_position);
 
     glBindVertexArray(light_VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+
+    default_shader.Use();
+
+    ////////////////////////
+    glUniform3f(glGetUniformLocation(default_shader.Program, "object_color"), 1.0f, 0.0f, 0.0f);
+    glUniform3f(glGetUniformLocation(default_shader.Program, "light_color"), 1.0f, 1.0f, 1.0f);
+    ////////////////////////
+
+    setupProjectionViewMatrix(default_shader);
+    setupModelMatrix(default_shader);
+
+    glBindVertexArray(cube_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 
@@ -222,12 +236,28 @@ void setupData() {
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
   };
 
-  GLuint VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
+  GLuint light_VBO;
+  glGenBuffers(1, &light_VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, light_VBO);
+  
   glGenVertexArrays(1, &light_VAO);
   glBindVertexArray(light_VAO);
+
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+  glEnableVertexAttribArray(0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+
+  GLuint cube_VBO;
+  glGenBuffers(1, &cube_VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, cube_VBO);
+
+  glGenVertexArrays(1, &cube_VAO);
+  glBindVertexArray(cube_VAO);
 
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
