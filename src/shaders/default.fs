@@ -70,30 +70,56 @@ uniform Material material;
 
 out vec4 color;
 
+vec3 CalcPhong(vec3 light_ambient, vec3 light_diffuse, vec3 light_specular, vec3 N, vec3 L, vec3 V);
+vec3 CalcDirLight(DirectionalLight light, vec3 N, vec3 V);
+vec3 CalcPointLight(PointLight light, vec3 N, vec3 position, vec3 V);
+vec3 CalcSpotLight(SpotLight light, vec3 N, vec3 position, vec3 V);
+
 void main() {
-  
-  // Ambient
-  //vec3 ambient = material.ambient * light.ambient;
-  vec3 ambient = vec3(texture(material.diffuse, vs_texture_coords)) * spot_light.ambient;
+  vec3 N = normalize(vs_normal);
+  vec3 V = normalize(camera_position - vs_position);
+  vec3 result;
+  result += CalcDirLight(directional_light, N, V);
+  result += CalcPointLight(point_light, N, vs_position, V);
+  result += CalcSpotLight(spot_light, N, vs_position, V);
+
+
+  color = vec4(result, 1.0f);
+}
+
+
+vec3 CalcPhong(vec3 light_ambient, vec3 light_diffuse, vec3 light_specular, vec3 N, vec3 L, vec3 V) {  
+  vec3 A = vec3(texture(material.diffuse, vs_texture_coords)) * light_ambient;
 
   // Diffuse 
-  vec3 norm = normalize(vs_normal);
-  vec3 lightDir = normalize(spot_light.position - vs_position);
-  float diff = max(dot(norm, lightDir), 0.0);
-  vec3 diffuse = vec3(texture(material.diffuse, vs_texture_coords)) * diff * spot_light.diffuse;
+  float diff = max(dot(N, L), 0.0);
+  vec3 D = vec3(texture(material.diffuse, vs_texture_coords)) * diff * light_diffuse;
 
   // Specular
-  vec3 viewDir = normalize(camera_position - vs_position);
-  vec3 reflectDir = normalize(reflect(-lightDir, norm));
-  float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-  vec3 specular = vec3(texture(material.specular, vs_texture_coords)) * spec * spot_light.specular;
+  vec3 R = normalize(reflect(-L, N));
+  float spec = pow(max(dot(V, R), 0.0), material.shininess);
+  vec3 S = vec3(texture(material.specular, vs_texture_coords)) * spec * light_specular;
 
-  float intensity = spot_light.intensity(vs_position);
-
-  diffuse *= intensity;
-  specular *= intensity;
-
-  vec3 result = (ambient + diffuse + specular);
-  color = vec4(result, 1.0f);
-  
+  vec3 result = (A + D + S);
+  return result;
 }
+
+vec3 CalcDirLight(DirectionalLight light, vec3 N, vec3 V) {
+  return CalcPhong(light.ambient, light.diffuse, light.specular, N, normalize(-light.direction), V);
+}
+
+vec3 CalcPointLight(PointLight light, vec3 N, vec3 position, vec3 V) {
+  vec3 L = normalize(light.position - position);
+  vec3 phong_result = CalcPhong(light.ambient, light.diffuse, light.specular, N, L, V);
+
+  return phong_result * light.attenuation(position);
+
+}
+
+vec3 CalcSpotLight(SpotLight light, vec3 N, vec3 position, vec3 V) {
+  vec3 L = normalize(light.position - position);
+  vec3 phong_result = CalcPhong(light.ambient, light.diffuse, light.specular, N, L, V);
+
+  return phong_result * light.intensity(position);
+}
+
