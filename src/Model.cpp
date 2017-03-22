@@ -29,7 +29,7 @@ void Model::draw(Shader shader) {
 
 void Model::loadModel(const std::string path) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << endl;
@@ -75,21 +75,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         }
 
         // Textures
-        if (mesh->mTextureCoords) {
-            // Has texture coords
-            aiVector3D * vector = mesh->mTextureCoords[0];
-            if (vector){
-                // Has components
-                vertex.texCoords.x = mesh->mTextureCoords[0][i].x;
-                vertex.texCoords.y = mesh->mTextureCoords[0][i].y;
-            }else {
-                vertex.texCoords.x = 0.0f;
-                vertex.texCoords.y = 0.0f;
-            }
-        } else {
-            vertex.texCoords = glm::vec2(0.0f, 0.0f);
-        }
+        vertex.texCoords = glm::vec2(0.0f, 0.0f);
 
+        if (mesh->mTextureCoords && mesh->mTextureCoords[0]) {
+          // Has not NULL coordinates 
+          vertex.texCoords.x = mesh->mTextureCoords[0][i].x;
+          vertex.texCoords.y = mesh->mTextureCoords[0][i].y;
+        } 
         vertices.push_back(vertex);
     }
 
