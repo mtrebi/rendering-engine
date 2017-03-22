@@ -181,6 +181,7 @@ void terminate() {
 
 void setupOpenGLFlags() {
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
   //glEnable(GL_STENCIL_TEST);
   //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
