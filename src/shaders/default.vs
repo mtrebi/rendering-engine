@@ -8,8 +8,8 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 vs_normal;
 out vec3 vs_position;
+out vec3 vs_normal;
 out vec2 vs_texture_coords;
 
 void main() {

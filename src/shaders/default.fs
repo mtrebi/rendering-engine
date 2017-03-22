@@ -1,8 +1,8 @@
 #version 330 core
 
 struct Material {
-  sampler2D diffuse;
-  sampler2D specular;
+  sampler2D texture_diffuse1;
+  sampler2D texture_specular1;
   float shininess;
 };
 
@@ -33,7 +33,6 @@ struct PointLight {
     return attenuation;
   }
 };
-
 
 struct SpotLight {
   vec3 position;
@@ -83,22 +82,22 @@ void main() {
   result += CalcPointLight(point_light, N, vs_position, V);
   result += CalcSpotLight(spot_light, N, vs_position, V);
 
-
+  //color = vec4(vec3(texture(material.texture_diffuse1, vs_texture_coords)), 1.0f);
   color = vec4(result, 1.0f);
 }
 
 
 vec3 CalcPhong(vec3 light_ambient, vec3 light_diffuse, vec3 light_specular, vec3 N, vec3 L, vec3 V) {  
-  vec3 A = vec3(texture(material.diffuse, vs_texture_coords)) * light_ambient;
+  vec3 A = vec3(texture(material.texture_diffuse1, vs_texture_coords)) * light_ambient;
 
   // Diffuse 
   float diff = max(dot(N, L), 0.0);
-  vec3 D = vec3(texture(material.diffuse, vs_texture_coords)) * diff * light_diffuse;
+  vec3 D = vec3(texture(material.texture_diffuse1, vs_texture_coords)) * diff * light_diffuse;
 
   // Specular
   vec3 R = normalize(reflect(-L, N));
   float spec = pow(max(dot(V, R), 0.0), material.shininess);
-  vec3 S = vec3(texture(material.specular, vs_texture_coords)) * spec * light_specular;
+  vec3 S = vec3(texture(material.texture_specular1, vs_texture_coords)) * spec * light_specular;
 
   vec3 result = (A + D + S);
   return result;
@@ -112,7 +111,7 @@ vec3 CalcPointLight(PointLight light, vec3 N, vec3 position, vec3 V) {
   vec3 L = normalize(light.position - position);
   vec3 phong_result = CalcPhong(light.ambient, light.diffuse, light.specular, N, L, V);
 
-  return phong_result * light.attenuation(position);
+  return phong_result;// *light.attenuation(position);
 
 }
 
