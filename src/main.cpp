@@ -33,7 +33,6 @@ void calculateCameraMovement();
 void setupData();
 void setupOpenGLFlags();
 void setupProjectionViewMatrix(Shader shader);
-void setupModelMatrix(Shader shader, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 translate = glm::vec3(1.0f, 1.0f, 1.0f));
 
 // Callbacks
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -80,9 +79,13 @@ int main() {
   Model dragon = Model("assets/models/dragon/dragon.obj");
   Model nanosuit = Model("assets/models/nanosuit/nanosuit.obj");
   Model crytek_sponza = Model("assets/models/crytek-sponza/sponza.obj");
+  Model sibenik = Model("assets/models/sibenik/sibenik.obj");
 
   Skybox skybox = Skybox(&camera, "assets/skybox/tutorial/");
 
+
+  cube.scale(glm::vec3(1.1f));
+  cube.translate(light_position);
 
   // Game loop
   while (!glfwWindowShouldClose(window))
@@ -99,16 +102,10 @@ int main() {
     light_shader.Use();
 
     setupProjectionViewMatrix(light_shader);
-    setupModelMatrix(light_shader, glm::vec3(0.2f), light_position);
-
     cube.draw(light_shader);
+    cube.translate(glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()), 0.0f));
 
-    ////////////////////////
-    light_position.x = sin(glfwGetTime()) +2.0f;
-    light_position.y = cos(glfwGetTime()) + 2.0f ;
-
-    ////////////////////////
-
+    /*
 
 
     default_shader.Use();
@@ -144,11 +141,10 @@ int main() {
     
     default_shader.Use();
     setupProjectionViewMatrix(default_shader);
-    setupModelMatrix(default_shader, glm::vec3(0.01f));
 
     crytek_sponza.draw(default_shader);
     //nanosuit.draw(default_shader);
-    
+    */
     glfwSwapBuffers(window);
   }
 
@@ -243,13 +239,6 @@ void setupProjectionViewMatrix(Shader shader) {
   glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 }
 
-void setupModelMatrix(Shader shader, glm::vec3 scale, glm::vec3 translate) {
-  //TODO: move to model object
-  glm::mat4 model = glm::mat4();
-  model = glm::translate(model, translate);
-  model = glm::scale(model, scale);
-  glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-}
 
 // Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {

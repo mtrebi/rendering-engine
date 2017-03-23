@@ -10,8 +10,6 @@
 using namespace std;
 // GL Includes
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <SOIL/SOIL.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -22,6 +20,7 @@ Model::Model(GLchar* path) {
 }
 
 void Model::draw(Shader shader) {
+  glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(m_model));
     for (auto& mesh : m_meshes) {
         mesh.draw(shader);
     }
@@ -190,4 +189,18 @@ GLint Model::TextureFromFile(const char* path, string directory, GLint level) {
     glBindTexture(GL_TEXTURE_2D, 0);
     SOIL_free_image_data(image);
     return textureID;
+}
+
+
+void Model::translate(const glm::vec3& translation) {
+  m_model = glm::translate(m_model, translation);
+
+}
+
+void Model::scale(const glm::vec3& scale) {
+  m_model = glm::scale(m_model, scale);
+}
+
+void Model::rotate(const glm::vec3& axis, const float degrees) {
+  m_model = glm::rotate(m_model, glm::radians(degrees), axis);
 }
