@@ -20,6 +20,7 @@ Model::Model(GLchar* path) {
 }
 
 void Model::draw(Shader shader) {
+  shader.Use();
   glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(m_model));
     for (auto& mesh : m_meshes) {
         mesh.draw(shader);
