@@ -19,6 +19,9 @@
 #include "shaders/Shader.h"
 #include "Camera.h"
 #include "Model.h"
+#include "Skybox.h"
+
+#include <vector>
 
 // Function prototypes
 GLFWwindow* initialize(const GLuint width, const GLuint height);
@@ -40,7 +43,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 const GLuint SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600;
 
 // Camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(SCREEN_WIDTH, SCREEN_HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f));
 bool keys[1024];
 GLfloat lastX = 400,        // Mouse last X position
 lastY = 300;        // Mouse last Y position
@@ -54,8 +57,11 @@ const GLchar* FS_PATH = "src/shaders/default.fs";
 const GLchar* LIGHT_VS_PATH = "src/shaders/light_shader.vs";
 const GLchar* LIGHT_FS_PATH = "src/shaders/light_shader.fs";
 
+const GLchar* SKYBOX_VS_PATH = "src/shaders/skybox.vs";
+const GLchar* SKYBOX_FS_PATH = "src/shaders/skybox.fs";
 
-glm::vec3 light_position = glm::vec3(1.0f, 5.5f, 1.5f);
+
+glm::vec3 light_position = glm::vec3(.0f, .0f, .0f);
 
 // The MAIN function, from here we start the application and run the game loop
 int main() {
@@ -68,9 +74,15 @@ int main() {
 
   Shader default_shader = Shader(VS_PATH, FS_PATH);
   Shader light_shader = Shader(LIGHT_VS_PATH, LIGHT_FS_PATH);
+  Shader skybox_shader = Shader(SKYBOX_VS_PATH, SKYBOX_FS_PATH);
 
+  Model cube = Model("assets/models/cube/cube.obj");
+  Model dragon = Model("assets/models/dragon/dragon.obj");
   Model nanosuit = Model("assets/models/nanosuit/nanosuit.obj");
-  Model cube = Model("assets/models/box/box.obj");
+  Model crytek_sponza = Model("assets/models/crytek-sponza/sponza.obj");
+
+  Skybox skybox = Skybox(&camera, "assets/skybox/tutorial/");
+
 
   // Game loop
   while (!glfwWindowShouldClose(window))
@@ -80,7 +92,10 @@ int main() {
     glfwPollEvents();
     calculateCameraMovement();
     clearBuffers();
+    
+    skybox.draw(skybox_shader);
 
+    
     light_shader.Use();
 
     setupProjectionViewMatrix(light_shader);
@@ -126,12 +141,14 @@ int main() {
     glUniform3f(glGetUniformLocation(default_shader.Program, "directional_light.specular"), 0.4f, 0.4f, 0.4f);
 
     ////////////////////////
-
+    
+    default_shader.Use();
     setupProjectionViewMatrix(default_shader);
-    setupModelMatrix(default_shader, glm::vec3(0.1f));
+    setupModelMatrix(default_shader, glm::vec3(0.01f));
 
-    nanosuit.draw(default_shader);
-
+    crytek_sponza.draw(default_shader);
+    //nanosuit.draw(default_shader);
+    
     glfwSwapBuffers(window);
   }
 
@@ -182,6 +199,7 @@ void terminate() {
 void setupOpenGLFlags() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
+  glDepthFunc(GL_LESS);
   //glEnable(GL_STENCIL_TEST);
   //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
@@ -217,32 +235,16 @@ void setupData() {
   glBindBuffer(GL_UNIFORM_BUFFER, 0);
   glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices);
   */
-
+  
 }
 
 void setupProjectionViewMatrix(Shader shader) {
-  /*
-  glUniformBlockBinding(shader.Program, glGetUniformBlockIndex(shader.Program, "Matrices"), 0);
-
-  glm::mat4 projection = glm::perspective(45.0f, (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
-  glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-  glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
-  glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-  glm::mat4 view = camera.GetViewMatrix();
-  glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-  glBindBuffer(GL_UNIFORM_BUFFER, 0);
-  */
-  glm::mat4 projection;
-  projection = glm::perspective(45.0f, (float) SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
-  glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-  glm::mat4 view = camera.GetViewMatrix();
-  glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+  glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
+  glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 }
 
 void setupModelMatrix(Shader shader, glm::vec3 scale, glm::vec3 translate) {
+  //TODO: move to model object
   glm::mat4 model = glm::mat4();
   model = glm::translate(model, translate);
   model = glm::scale(model, scale);
