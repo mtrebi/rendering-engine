@@ -1,8 +1,11 @@
 #include "Camera.h"
 
 // Constructor with vectors
-Camera::Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch) 
-    : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
+Camera::Camera(GLuint screen_width, GLuint screen_height, glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch)
+    : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM), m_near(NEAR), m_far(FAR) {
+  this->m_width = screen_width;
+  this->m_height = screen_height;
+
     this->Position = position;
     this->WorldUp = up;
     this->Yaw = yaw;
@@ -10,9 +13,11 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch)
     this->updateCameraVectors();
 }
 // Constructor with scalar values
-Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) 
-    : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
-    this->Position = glm::vec3(posX, posY, posZ);
+Camera::Camera(GLuint screen_width, GLuint screen_height, GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch)
+    : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM), m_near(NEAR), m_far(FAR) {
+  this->m_width = screen_width;
+  this->m_height = screen_height;
+  this->Position = glm::vec3(posX, posY, posZ);
     this->WorldUp = glm::vec3(upX, upY, upZ);
     this->Yaw = yaw;
     this->Pitch = pitch;
@@ -22,6 +27,11 @@ Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat up
 // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
 glm::mat4 Camera::GetViewMatrix() {
     return glm::lookAt(this->Position, this->Position + this->Front, this->Up);
+}
+
+glm::mat4 Camera::GetProjectionMatrix() {
+  return glm::perspective(this->Zoom, (float) m_width / m_height, m_near, m_far);
+
 }
 
 // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
