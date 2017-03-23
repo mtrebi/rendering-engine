@@ -169,6 +169,7 @@ GLFWwindow* initialize(const GLuint width, const GLuint height) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+  glfwWindowHint(GLFW_SAMPLES, 4);
 
   // Create a GLFWwindow object that we can use for GLFW's functions
   GLFWwindow* window = glfwCreateWindow(width, height, "rendering-engine", nullptr, nullptr);
@@ -204,6 +205,7 @@ void setupOpenGLFlags() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glDepthFunc(GL_LEQUAL);
+  glEnable(GL_MULTISAMPLE);
   //glEnable(GL_STENCIL_TEST);
   //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
