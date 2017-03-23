@@ -30,9 +30,10 @@ void terminate();
 void clearBuffers();
 void calculateFrameTime();
 void calculateCameraMovement();
-void setupData();
+void setupUBO();
 void setupOpenGLFlags();
-void setupProjectionViewMatrix(Shader shader);
+void setupViewMatrix(Shader shader);
+void setupProjectionMatrix(Shader shader);
 
 // Callbacks
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -62,6 +63,8 @@ const GLchar* SKYBOX_FS_PATH = "src/shaders/skybox.fs";
 
 glm::vec3 light_position = glm::vec3(.0f, .0f, .0f);
 
+GLuint uboMatrices;
+
 // The MAIN function, from here we start the application and run the game loop
 int main() {
 
@@ -69,7 +72,7 @@ int main() {
 
   setupOpenGLFlags();
 
-  setupData();
+
 
   Shader default_shader = Shader(VS_PATH, FS_PATH);
   Shader light_shader = Shader(LIGHT_VS_PATH, LIGHT_FS_PATH);
@@ -84,8 +87,16 @@ int main() {
   Skybox skybox = Skybox(&camera, "assets/skybox/tutorial/");
 
 
-  cube.scale(glm::vec3(1.1f));
+  cube.scale(glm::vec3(0.2f));
   cube.translate(light_position);
+
+  nanosuit.scale(glm::vec3(0.1f));
+  nanosuit.translate(glm::vec3(4.0f, 0.0f, 0.0f));
+
+  setupUBO();
+  setupProjectionMatrix(default_shader);
+  setupProjectionMatrix(light_shader);
+  //TODO: setup skybox ubo
 
   // Game loop
   while (!glfwWindowShouldClose(window))
@@ -96,19 +107,15 @@ int main() {
     calculateCameraMovement();
     clearBuffers();
     
-    skybox.draw(skybox_shader);
+    // Light shader
+    light_shader.Use();
+    setupViewMatrix(light_shader);
+    cube.draw(light_shader);
+    //cube.translate(glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()), 0.0f));
 
     
-    light_shader.Use();
-
-    setupProjectionViewMatrix(light_shader);
-    cube.draw(light_shader);
-    cube.translate(glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()), 0.0f));
-
-    /*
-
-
     default_shader.Use();
+    setupViewMatrix(default_shader);
 
     ////////////////////////
     glUniform3f(glGetUniformLocation(default_shader.Program, "camera_position"), camera.Position.x, camera.Position.y, camera.Position.z);
@@ -137,14 +144,15 @@ int main() {
     glUniform3f(glGetUniformLocation(default_shader.Program, "directional_light.diffuse"), 0.4f, 0.4f, 0.4f);
     glUniform3f(glGetUniformLocation(default_shader.Program, "directional_light.specular"), 0.4f, 0.4f, 0.4f);
 
-    ////////////////////////
-    
-    default_shader.Use();
-    setupProjectionViewMatrix(default_shader);
 
-    crytek_sponza.draw(default_shader);
-    //nanosuit.draw(default_shader);
-    */
+    //setupProjectionViewMatrix(default_shader);
+    nanosuit.draw(default_shader);
+    //crytek_sponza.draw(default_shader);
+
+    //TODO: Setup view matrix skybox
+    skybox.draw(skybox_shader);
+
+
     glfwSwapBuffers(window);
   }
 
@@ -195,7 +203,7 @@ void terminate() {
 void setupOpenGLFlags() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
-  glDepthFunc(GL_LESS);
+  glDepthFunc(GL_LEQUAL);
   //glEnable(GL_STENCIL_TEST);
   //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
@@ -223,20 +231,34 @@ void calculateCameraMovement() {
     camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-void setupData() {
-  /*
+void setupUBO() {
   glGenBuffers(1, &uboMatrices);
   glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
   glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
   glBindBuffer(GL_UNIFORM_BUFFER, 0);
   glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices);
-  */
-  
 }
 
-void setupProjectionViewMatrix(Shader shader) {
-  glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
-  glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+void setupProjectionMatrix(Shader shader) {
+  const glm::mat4 projection = camera.GetProjectionMatrix();
+
+  glUniformBlockBinding(shader.Program, glGetUniformBlockIndex(shader.Program, "Matrices"), 0);
+
+  glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
+
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void setupViewMatrix(Shader shader) {
+  const glm::mat4 view = camera.GetViewMatrix();
+
+  glUniformBlockBinding(shader.Program, glGetUniformBlockIndex(shader.Program, "Matrices"), 0);
+
+  glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+  glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
+
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 
