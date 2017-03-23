@@ -37,4 +37,5 @@ public:
 private:
   void load_textures();
   void load_VAO();
+  void setup_matrices_uniform(Shader &shader);
 };

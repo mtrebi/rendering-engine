@@ -34,15 +34,21 @@ void Skybox::setup_skybox_uniform(Shader& shader, const GLuint texture_unit) {
 
 }
 
-void Skybox::draw(Shader& shader) {
-  glDepthMask(GL_FALSE);
-  shader.Use();
-
+// TODO: Use UBOs
+void Skybox::setup_matrices_uniform(Shader& shader) {
   glm::mat4 view = glm::mat4(glm::mat3(m_camera->GetViewMatrix()));
   glm::mat4 projection = m_camera->GetProjectionMatrix();
 
   glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void Skybox::draw(Shader& shader) {
+  glDepthMask(GL_FALSE);
+  shader.Use();
+
+  // Setup matrices
+  setup_matrices_uniform(shader);
 
   // Setup texture
   setup_skybox_uniform(shader);
