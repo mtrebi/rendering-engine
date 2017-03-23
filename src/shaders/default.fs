@@ -86,7 +86,7 @@ void main() {
   vec3 result;
   result += CalcDirLight(directional_light, N, V);
   result += CalcPointLight(point_light, N, fs_in.position, V);
-  result += CalcSpotLight(spot_light, N, fs_in.position, V);
+  //result += CalcSpotLight(spot_light, N, fs_in.position, V);
 
   //color = vec4(vec3(texture(material.texture_diffuse1, fs_in.texture_coords)), 1.0f);
   color = vec4(result, 1.0f);
@@ -101,8 +101,10 @@ vec3 CalcPhong(vec3 light_ambient, vec3 light_diffuse, vec3 light_specular, vec3
   vec3 D = vec3(texture(material.texture_diffuse1, fs_in.texture_coords)) * diff * light_diffuse;
 
   // Specular
-  vec3 R = normalize(reflect(-L, N));
-  float spec = pow(max(dot(V, R), 0.0), material.shininess);
+  //vec3 R = normalize(reflect(-L, N));
+  vec3 H = normalize(V + L);
+  //float spec = pow(max(dot(V, R), 0.0), material.shininess);
+  float spec = pow(max(dot(N, H), 0.0), material.shininess);
   vec3 S = vec3(texture(material.texture_specular1, fs_in.texture_coords)) * spec * light_specular;
 
   vec3 result = (A + D + S);
@@ -117,7 +119,7 @@ vec3 CalcPointLight(PointLight light, vec3 N, vec3 position, vec3 V) {
   vec3 L = normalize(light.position - position);
   vec3 phong_result = CalcPhong(light.ambient, light.diffuse, light.specular, N, L, V);
 
-  return phong_result;// *light.attenuation(position);
+  return phong_result * light.attenuation(position);
 
 }
 
