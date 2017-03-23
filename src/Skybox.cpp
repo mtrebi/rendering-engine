@@ -26,6 +26,14 @@ Skybox::Skybox(Camera* camera, const std::string right, const std::string left, 
   load_textures();
 }
 
+void Skybox::setup_skybox_uniform(Shader& shader, const GLuint texture_unit) {
+  shader.Use();
+  glActiveTexture(GL_TEXTURE0 + texture_unit);      // Activate texture uni
+  glUniform1i(glGetUniformLocation(shader.Program, "skybox"), 0); // Bind skybox to texture unit
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);   // Bind cubemap to active texture 
+
+}
+
 void Skybox::draw(Shader& shader) {
   glDepthMask(GL_FALSE);
   shader.Use();
@@ -37,9 +45,7 @@ void Skybox::draw(Shader& shader) {
   glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
   // Setup texture
-  glActiveTexture(GL_TEXTURE0);               // Activate texture unit 0
-  glUniform1i(glGetUniformLocation(shader.Program, "skybox"), 0); // Bind skybox to texture unit 0
-  glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);   // Bind cubemap to active texture (0)
+  setup_skybox_uniform(shader);
 
   // Draw
   glBindVertexArray(m_VAO);

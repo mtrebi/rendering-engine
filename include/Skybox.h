@@ -31,6 +31,7 @@ public:
   Skybox(Camera* camera, const std::string base_path);
   Skybox(Camera* camera, const std::string right, const std::string left, const std::string top, const std::string bottom, const std::string back, const std::string front);
 
+  void setup_skybox_uniform(Shader& shader, const GLuint texture_unit = 0);
   void draw(Shader& shader);
 
 private:
