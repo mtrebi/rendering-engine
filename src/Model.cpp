@@ -104,7 +104,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, Texture::SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     
-        //TODO: Get normal!        
+        //TODO: Get normal!     
+
+        std::vector<Texture> reflectionMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, Texture::REFLECTION);
+        textures.insert(textures.end(), reflectionMaps.begin(), reflectionMaps.end());
+
                   
         aiColor4D Ka;
         aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &Ka);
@@ -155,6 +159,9 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* material, aiTexture
                     break;
                 case Texture::Type::SPECULAR:
                     texture.id = TextureFromFile(str.C_Str(), m_directory, GL_SRGB);
+                    break;
+                case Texture::Type::REFLECTION:
+                    texture.id = TextureFromFile(str.C_Str(), m_directory, GL_RGB);
                     break;
                 default:
                     std::cout << "Texture type not specified" << std::endl;

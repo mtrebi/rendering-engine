@@ -13,7 +13,9 @@ struct Texture {
     GLuint id;
 
     enum Type {
-        DIFFUSE, SPECULAR
+        DIFFUSE, 
+        SPECULAR,
+        REFLECTION
     } type;
     aiString path; // Store path of texture to avoid loading it more than once
 };

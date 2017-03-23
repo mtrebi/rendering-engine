@@ -45,10 +45,12 @@ void Mesh::initialize() {
 void Mesh::draw(Shader shader) {
     GLuint diffuseCount = 1;
     GLuint specularCount = 1;
+    GLuint reflectionCount = 1;
+
 
     // Assign textures dynamically
     for (int i = 0; i < textures.size(); ++i) {
-        glActiveTexture(GL_TEXTURE0 + i);
+        glActiveTexture(GL_TEXTURE1 + i);
 
         Texture currentTexture = textures[i];
 
@@ -62,9 +64,13 @@ void Mesh::draw(Shader shader) {
                 texture_suffix += "_specular" + std::to_string(specularCount);
                 ++specularCount;
                 break;
+            case Texture::REFLECTION:
+              texture_suffix += "_reflection" + std::to_string(reflectionCount);
+              ++reflectionCount;
+              break;
         }
         
-        glUniform1i(glGetUniformLocation(shader.Program, ("material." + texture_suffix).c_str()), i);
+        glUniform1i(glGetUniformLocation(shader.Program, ("material." + texture_suffix).c_str()), i+1);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);
